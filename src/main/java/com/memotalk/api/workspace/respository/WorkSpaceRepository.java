@@ -1,5 +1,6 @@
 package com.memotalk.api.workspace.respository;
 
+import com.memotalk.api.workspace.dto.WorkSpaceResponseDTO;
 import com.memotalk.api.workspace.entity.WorkSpace;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,5 @@ public interface WorkSpaceRepository extends JpaRepository<WorkSpace, Long> {
     List<WorkSpace> findAllByMemoUser_Email(String email);
     @Query(value = "SELECT MAX(w.id) FROM WorkSpace w WHERE w.memoUser.email = :email")
     Long findMaxIdByMemoUser_Email(@Param("email") String email);
+
 }

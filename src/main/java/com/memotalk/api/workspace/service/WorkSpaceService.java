@@ -54,4 +54,12 @@ public class WorkSpaceService {
                 () -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND)
         ).moveTop(recentId);
     }
+
+    @Transactional(readOnly = true)
+    public WorkSpaceResponseDTO getWorkspace(String email, Long workspaceId) {
+        WorkSpace workSpace = workSpaceRepository.findByIdAndMemoUser_Email(workspaceId, email).orElseThrow(
+                () -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND));
+
+        return new WorkSpaceResponseDTO(workSpace);
+    }
 }

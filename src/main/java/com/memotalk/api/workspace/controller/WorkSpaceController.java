@@ -72,6 +72,19 @@ public class WorkSpaceController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @Operation(summary = "워크스페이스 상세보기 API")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "워크스페이스 상세보기 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "404", description = "워크스페이스를 찾을 수 없음")
+    })
+    @GetMapping("/{workspaceId}")
+    public ResponseEntity<WorkSpaceResponseDTO> getWorkspace(@Parameter(hidden = true) @AuthenticationPrincipal String email, @PathVariable Long workspaceId) {
+        WorkSpaceResponseDTO workSpaceResponseDTO = workSpaceService.getWorkspace(email, workspaceId);
+        return ResponseEntity.status(HttpStatus.OK).body(workSpaceResponseDTO);
+    }
+
     @Operation(summary = "워크스페이스 목록 조회 API")
     @SecurityRequirement(name = "Bearer Authentication")
     @ApiResponses(value = {
