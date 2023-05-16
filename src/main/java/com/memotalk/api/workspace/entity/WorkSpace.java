@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 @Getter
 @Entity
@@ -30,6 +31,9 @@ public class WorkSpace {
 
     @Column
     private String title;
+
+    @Column
+    private Integer imageId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memo_user_id", nullable = false)
@@ -52,9 +56,13 @@ public class WorkSpace {
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Todo> todoList;
 
+    @Transient
+    private Random random;
+
     public WorkSpace(MemoUser memoUser){
         this.title = "워크 스페이스";
         this.memoUser = memoUser;
+        this.imageId = generateRandomNumber();
     }
 
     public void modify(String title){
@@ -63,5 +71,9 @@ public class WorkSpace {
 
     public void moveTop(Long recentId){
         this.id = recentId + 1L;
+    }
+
+    private int generateRandomNumber() {
+        return random.nextInt(8);
     }
 }

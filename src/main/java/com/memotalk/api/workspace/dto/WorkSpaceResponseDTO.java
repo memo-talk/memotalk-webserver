@@ -17,6 +17,9 @@ public class WorkSpaceResponseDTO {
     @Schema(description = "워크스페이스 제목")
     private String title;
 
+    @Schema(description = "워크스페이스 이미지 아이디")
+    private Integer imageId;
+
     @Schema(description = "워크스페이스 생성일시 (yyyy-MM-dd'T'HH:mm:ss)")
     private String createdAt;
 
@@ -26,6 +29,7 @@ public class WorkSpaceResponseDTO {
     public WorkSpaceResponseDTO(WorkSpace workSpace){
         this.id = workSpace.getId();
         this.title = workSpace.getTitle();
+        this.imageId = workSpace.getImageId();
         this.createdAt = workSpace.getCreatedAt().toString();
         this.modifiedAt = workSpace.getModifiedAt().toString();
     }

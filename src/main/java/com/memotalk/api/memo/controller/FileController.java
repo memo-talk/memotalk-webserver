@@ -1,6 +1,8 @@
 package com.memotalk.api.memo.controller;
 
 import com.memotalk.api.memo.dto.FileUploadRequestDTO;
+import com.memotalk.api.memo.dto.MemoResponseDTO;
+import com.memotalk.api.memo.entity.Memo;
 import com.memotalk.api.memo.service.MemoService;
 import com.memotalk.api.memouser.dto.MemoUserSignupRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -21,6 +24,8 @@ import javax.validation.Valid;
 public class FileController {
 
     private final MemoService memoService;
+    private final SimpMessageSendingOperations messagingTemplate;
+    private static final String DESTINATION = "/sub/chat/room/";
 
     @Operation(summary = "파일 업로드 API")
     @ApiResponses(value = {
@@ -29,7 +34,9 @@ public class FileController {
     })
     @PostMapping("/memo-upload")
     public ResponseEntity<Void> uploadFile(@Valid @ModelAttribute FileUploadRequestDTO dto) {
-        memoService.uploadFile(dto);
+        Memo memo = memoService.uploadFile(dto);
+        messagingTemplate.convertAndSend(DESTINATION + memo.getWorkspace().getId(),
+                new MemoResponseDTO(memo));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
