@@ -17,10 +17,24 @@ public class TokenProvider {
     @Value("${jwt.access-expiration-in-ms}")
     private long accessExpirationInMs;
 
+    @Value("${jwt.refresh-expiration-in-ms}")
+    private long refreshExpirationInMs;
+
     // 액세스 토큰을 생성합니다.
     public String generateAccessToken(String email) {
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + accessExpirationInMs);
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(expirationDate)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+    }
+
+    public String generateRefreshToken(String email) {
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + refreshExpirationInMs);
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(now)
@@ -55,5 +69,42 @@ public class TokenProvider {
             log.info("JWT claims string is empty");
         }
         return false;
+    }
+
+    public Claims getExpiredTokenClaims(String token) {
+        try {
+            Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT token.");
+            return e.getClaims();
+        }
+        return null;
+    }
+
+    public boolean validate(String token) {
+        return this.getTokenClaims(token) != null;
+    }
+    public Claims getTokenClaims(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (SecurityException e) {
+            log.info("Invalid JWT signature.");
+        } catch (MalformedJwtException e) {
+            log.info("Invalid JWT token.");
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT token.");
+            return e.getClaims();
+        } catch (UnsupportedJwtException e) {
+            log.info("Unsupported JWT token.");
+        } catch (IllegalArgumentException e) {
+            log.info("JWT token compact of handler are invalid.");
+        }
+        return null;
     }
 }

@@ -3,6 +3,8 @@ package com.memotalk.api.memo.controller;
 import com.memotalk.api.memo.dto.MemoDeleteRequestDTO;
 import com.memotalk.api.memo.dto.MemoMarkImportantRequestDTO;
 import com.memotalk.api.memo.dto.MemoRequestDTO;
+import com.memotalk.api.memo.dto.MemoResponseDTO;
+import com.memotalk.api.memo.entity.Memo;
 import com.memotalk.api.memo.service.MemoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -16,13 +18,13 @@ import javax.validation.Valid;
 public class MemoController {
 
     private final SimpMessageSendingOperations messagingTemplate;
-    private final MemoService memoService;
     private static final String DESTINATION = "/sub/chat/room/";
+    private final MemoService memoService;
 
     @MessageMapping(value = "/memo")
     public void message(@Valid MemoRequestDTO memoRequestDto) {
-        memoService.createMemo(memoRequestDto);
-        messagingTemplate.convertAndSend(DESTINATION + memoRequestDto.getWorkspaceId(), memoRequestDto);
+        messagingTemplate.convertAndSend(DESTINATION + memoRequestDto.getWorkspaceId(),
+                new MemoResponseDTO(memoService.createMemo(memoRequestDto)));
     }
 
     @MessageMapping(value = "/memo/delete")

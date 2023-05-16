@@ -17,6 +17,9 @@ public enum ErrorCode {
     TODO_NOT_FOUND("존재하지 않는 TODO 입니다."),
     FILE_UPLOAD_FAIL("파일 업로드에 실패했습니다."),
     FILE_DELETE_FAIL("파일 삭제에 실패했습니다."),
-    MULTIPART_FILE_CONVERT_FAIL("MultiPart File을 Convert 하는 중 오류가 발생하였습니다. ");
+    MULTIPART_FILE_CONVERT_FAIL("MultiPart File을 Convert 하는 중 오류가 발생하였습니다. "),
+    INVALID_ACCESS_TOKEN("유효하지 않은 액세스 토큰입니다."),
+    NOT_EXPIRED_TOKEN_YET("토큰의 만료기간이 남아있습니다."),
+    INVALID_REFRESH_TOKEN("유효하지 않은 리프레시 토큰입니다.");
     private final String message;
 }

@@ -1,7 +1,13 @@
 package com.memotalk.api.memouser.controller;
 
 import com.memotalk.api.memouser.dto.*;
+import com.memotalk.api.memouser.entity.UserRefreshToken;
+import com.memotalk.api.memouser.respository.UserRefreshTokenRepository;
 import com.memotalk.api.memouser.service.MemoUserService;
+import com.memotalk.config.jwt.TokenProvider;
+import com.memotalk.util.CookieUtil;
+import com.memotalk.util.HeaderUtil;
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,12 +18,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Date;
 
 
 @RestController
@@ -49,8 +60,8 @@ public class MemoUserController {
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @PostMapping("/signin")
-    public ResponseEntity<MemoUserSigninResponseDTO> signin(@Valid @RequestBody MemoUserSigninRequestDTO reqeustDTO) {
-        MemoUserSigninResponseDTO responseDTO = memoUserService.signin(reqeustDTO);
+    public ResponseEntity<MemoUserSigninResponseDTO> signin(@Valid @RequestBody MemoUserSigninRequestDTO requestDTO) {
+        MemoUserSigninResponseDTO responseDTO = memoUserService.signin(requestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
@@ -108,5 +119,25 @@ public class MemoUserController {
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody MemoUserPasswordResetRequestDTO requestDTO){
         memoUserService.resetPassword(requestDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "리프레시 토큰 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "리프레시 성공",
+                    content = @Content(schema = @Schema(implementation = MemoUserSigninResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식"),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<MemoUserSigninResponseDTO> refreshToken (
+            HttpServletRequest request,
+            @Valid @RequestBody RefreshRequestDTO dto,
+            @Parameter(hidden = true) @AuthenticationPrincipal String email) {
+
+        // access token 확인
+        String accessToken = HeaderUtil.getAccessToken(request);
+        MemoUserSigninResponseDTO responseDTO = memoUserService.refresh(dto.getRefreshToken(), accessToken);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 }

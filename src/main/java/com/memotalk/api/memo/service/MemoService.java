@@ -31,20 +31,20 @@ public class MemoService {
                 .collect(Collectors.toList());
     }
 
-    public void createMemo(MemoRequestDTO memoRequestDto) {
+    public Memo createMemo(MemoRequestDTO memoRequestDto) {
         WorkSpace workSpace = workSpaceRepository.findById(memoRequestDto.getWorkspaceId()).orElseThrow(
                 () -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND)
         );
-        memoRepository.save(new Memo(workSpace, memoRequestDto.getContent(), null));
+        return memoRepository.save(new Memo(workSpace, memoRequestDto.getContent(), null));
     }
 
-    public void uploadFile(FileUploadRequestDTO fileUploadRequestDTO){
+    public Memo uploadFile(FileUploadRequestDTO fileUploadRequestDTO){
         WorkSpace workSpace = workSpaceRepository.findById(fileUploadRequestDTO.getWorkspaceId()).orElseThrow(
                 () -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND)
         );
 
         String s3FileUrl = fileService.upload(fileUploadRequestDTO.getMultipartFile());
-        memoRepository.save(new Memo(workSpace, null, s3FileUrl));
+        return memoRepository.save(new Memo(workSpace, null, s3FileUrl));
     }
 
     public void deleteMemo(Long memoId) {
