@@ -13,4 +13,6 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     void deleteByWorkspace_MemoUser_EmailAndId(String email, Long todoId);
     Todo findByWorkspace_MemoUser_EmailAndId(String email, Long todoId);
     List<Todo> findAllByWorkspace_IdAndStatus(Long workspaceId, Status done);
+
+    void deleteAllByWorkspace_MemoUser_EmailAndWorkspace_Id(String email, Long workspaceId);
 }

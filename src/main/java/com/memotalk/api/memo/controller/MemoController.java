@@ -4,7 +4,6 @@ import com.memotalk.api.memo.dto.MemoDeleteRequestDTO;
 import com.memotalk.api.memo.dto.MemoMarkImportantRequestDTO;
 import com.memotalk.api.memo.dto.MemoRequestDTO;
 import com.memotalk.api.memo.dto.MemoResponseDTO;
-import com.memotalk.api.memo.entity.Memo;
 import com.memotalk.api.memo.service.MemoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -35,7 +34,7 @@ public class MemoController {
 
     @MessageMapping(value = "/memo/mark-important")
     public void markMemoImportant(@Valid MemoMarkImportantRequestDTO memoMarkImportantRequestDTO) {
-        memoService.markMemoImportant(memoMarkImportantRequestDTO);
-        messagingTemplate.convertAndSend(DESTINATION + memoMarkImportantRequestDTO.getWorkspaceId(), memoMarkImportantRequestDTO);
+        MemoResponseDTO responseDTO = new MemoResponseDTO(memoService.markMemoImportant(memoMarkImportantRequestDTO));
+        messagingTemplate.convertAndSend(DESTINATION + memoMarkImportantRequestDTO.getWorkspaceId(), responseDTO);
     }
 }

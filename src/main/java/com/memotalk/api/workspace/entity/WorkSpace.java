@@ -57,7 +57,7 @@ public class WorkSpace {
     private List<Todo> todoList;
 
     @Transient
-    private Random random;
+    private Random random = new Random();
 
     public WorkSpace(MemoUser memoUser){
         this.title = "워크 스페이스";

@@ -73,6 +73,12 @@ public class MemoUserService {
         return new MemoUserSigninResponseDTO(accessToken, refreshToken);
     }
 
+    public void validateEmail(String email){
+        if(!memoUserRepository.existsByEmail(email)){
+            throw new BadRequestException(ErrorCode.NOT_FOUND_EMAIL);
+        }
+    }
+
     private void validateEmailNotExists(String email){
         if(memoUserRepository.existsByEmail(email)){
             throw new BadRequestException(ErrorCode.EMAIL_ALREADY_EXISTS);

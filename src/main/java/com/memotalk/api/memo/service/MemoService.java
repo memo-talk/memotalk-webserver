@@ -56,15 +56,15 @@ public class MemoService {
         memoRepository.delete(memo);
     }
 
-    public void markMemoImportant(MemoMarkImportantRequestDTO memoMarkImportantRequestDTO) {
-        memoRepository.findById(memoMarkImportantRequestDTO.getMemoId()).orElseThrow(
+    public Memo markMemoImportant(MemoMarkImportantRequestDTO memoMarkImportantRequestDTO) {
+        return memoRepository.findById(memoMarkImportantRequestDTO.getMemoId()).orElseThrow(
                 () -> new NotFoundException(ErrorCode.NOT_FOUND_MEMO)
         ).markImportant();
     }
 
     @Transactional(readOnly = true)
     public List<MemoResponseDTO> searchMemoWithKeyword(Long workspaceId, String keyword) {
-        return memoRepository.findAllByWorkspace_IdAndDescriptionContaining(workspaceId, keyword)
+        return memoRepository.findAllByWorkspace_IdAndDescriptionContainingOrderByCreatedAtDesc(workspaceId, keyword)
                 .stream().map(MemoResponseDTO::new)
                 .collect(Collectors.toList());
     }

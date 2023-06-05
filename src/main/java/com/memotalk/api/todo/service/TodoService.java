@@ -55,4 +55,8 @@ public class TodoService {
                 .map(TodoResponseDTO::new)
                 .collect(Collectors.toList());
     }
+
+    public void deleteAll(String email, Long workspaceId) {
+        todoRepository.deleteAllByWorkspace_MemoUser_EmailAndWorkspace_Id(email, workspaceId);
+    }
 }
