@@ -11,4 +11,6 @@ import java.util.List;
 public interface MemoRepository extends JpaRepository<Memo, Long> {
     List<Memo> findAllByWorkspace_Id(Long workspaceId);
     List<Memo> findAllByWorkspace_IdAndDescriptionContainingOrderByCreatedAtDesc(Long workspaceId, String keyword);
+
+    Memo findByWorkspace_Id(Long workspaceId);
 }

@@ -8,19 +8,12 @@ import com.memotalk.api.workspace.entity.WorkSpace;
 import com.memotalk.api.workspace.respository.WorkSpaceRepository;
 import com.memotalk.config.jwt.TokenProvider;
 import com.memotalk.exception.BadRequestException;
-import com.memotalk.exception.NoAuthException;
 import com.memotalk.exception.NotFoundException;
 import com.memotalk.exception.enumeration.ErrorCode;
 import com.memotalk.api.memouser.entity.MemoUser;
 import com.memotalk.api.memouser.respository.MemoUserRepository;
-import com.memotalk.util.CookieUtil;
 import io.jsonwebtoken.Claims;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +46,7 @@ public class MemoUserService {
         );
 
         if (!passwordEncoder.matches(requestDTO.getPassword(), memoUser.getPassword())){
-            throw new NoAuthException(ErrorCode.PASSWORD_MISMATCH);
+            throw new NotFoundException(ErrorCode.PASSWORD_MISMATCH);
         }
 
         // 토큰 생성
@@ -95,7 +88,7 @@ public class MemoUserService {
     public void unlock(String email, MemoUserUnlockRequestDTO requestDTO) {
         memoUserRepository.findByEmail(email)
                 .filter(u -> passwordEncoder.matches(requestDTO.getPassword(), u.getPassword()))
-                .orElseThrow(() -> new NoAuthException(ErrorCode.USER_NOT_FOUND_OR_PASSWORD_MISMATCH))
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND_OR_PASSWORD_MISMATCH))
                 .unlock();
     }
 

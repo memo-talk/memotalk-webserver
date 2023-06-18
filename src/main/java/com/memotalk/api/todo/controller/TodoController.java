@@ -130,4 +130,19 @@ public class TodoController {
         List<TodoResponseDTO> todoResponseDTOList = todoService.getDoneTodoList(workspaceId);
         return ResponseEntity.status(HttpStatus.OK).body(todoResponseDTOList);
     }
+
+    @Operation(summary = "완료된 할 일 목록 전체 삭제 API")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "완료된 할 일 삭제 성공",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = TodoResponseDTO.class)))),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "404", description = "워크스페이스를 찾을 수 없음")
+    })
+    @DeleteMapping("/todo-list/{workspaceId}/done")
+    public ResponseEntity<List<TodoResponseDTO>> deleteDoneTodo(@PathVariable Long workspaceId, @AuthenticationPrincipal String email) {
+        todoService.deleteDoneTodo(workspaceId, email);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

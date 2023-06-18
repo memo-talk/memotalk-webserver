@@ -1,13 +1,12 @@
 package com.memotalk.api.memo.service;
 
-import com.memotalk.api.memo.dto.FileUploadRequestDTO;
-import com.memotalk.api.memo.dto.MemoMarkImportantRequestDTO;
-import com.memotalk.api.memo.dto.MemoResponseDTO;
+import com.memotalk.api.memo.dto.*;
 import com.memotalk.api.memo.entity.Memo;
 import com.memotalk.api.memo.respository.MemoRepository;
+import com.memotalk.api.memouser.entity.MemoUser;
+import com.memotalk.api.memouser.respository.MemoUserRepository;
 import com.memotalk.api.workspace.entity.WorkSpace;
 import com.memotalk.api.workspace.respository.WorkSpaceRepository;
-import com.memotalk.api.memo.dto.MemoRequestDTO;
 import com.memotalk.exception.NotFoundException;
 import com.memotalk.exception.enumeration.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +23,10 @@ public class MemoService {
     private final MemoRepository memoRepository;
     private final WorkSpaceRepository workSpaceRepository;
     private final FileService fileService;
+    private final MemoUserRepository memoUserRepository;
+    private static final long INIT_PRIORITY = 9999L;
+    private static final long NEXT_ORDER = 1;
+
     @Transactional(readOnly = true)
     public List<MemoResponseDTO> getMemoList(Long workspaceId) {
         return memoRepository.findAllByWorkspace_Id(workspaceId)
@@ -74,5 +77,19 @@ public class MemoService {
 
     public void deleteAllMemo() {
         memoRepository.deleteAll();
+    }
+
+    public void convertTodo(ConvertReqeustDTO convertReqeustDTO) {
+        Memo memo = memoRepository.findByWorkspace_Id(convertReqeustDTO.getWorkspaceId());
+
+        MemoUser memoUser = memoUserRepository.findByEmail(convertReqeustDTO.getEmail()).orElseThrow(
+                () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
+        );
+
+        long priority = workSpaceRepository.findDistinctTopByMemoUser_EmailOrderByPriorityDesc(convertReqeustDTO.getEmail())
+                .map(WorkSpace::getPriority)
+                .orElse(INIT_PRIORITY);
+
+        workSpaceRepository.save(new WorkSpace(memoUser, priority + NEXT_ORDER, memo.getDescription()));
     }
 }

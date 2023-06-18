@@ -23,7 +23,7 @@ public class TodoService {
     private final WorkSpaceRepository workSpaceRepository;
     private final TodoRepository todoRepository;
     public List<TodoResponseDTO> getTodoList(Long workspaceId) {
-        return todoRepository.findAllByWorkspace_Id(workspaceId)
+        return todoRepository.findAllByWorkspace_IdAndStatus(workspaceId, Status.TODO)
                 .stream().map(TodoResponseDTO::new)
                 .collect(Collectors.toList());
     }
@@ -62,5 +62,9 @@ public class TodoService {
 
     public void update(TodoRequestDTO requestDTO) {
         todoRepository.findByWorkspace_Id(requestDTO.getWorkspaceId()).update(requestDTO.getContent());
+    }
+
+    public void deleteDoneTodo(Long workspaceId, String email) {
+        todoRepository.deleteDoneTodosByUserId(email, workspaceId);
     }
 }

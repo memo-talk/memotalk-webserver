@@ -69,6 +69,13 @@ public class WorkSpace {
         this.priority = priority;
     }
 
+    public WorkSpace(MemoUser memoUser, Long priority, String title){
+        this.title = title;
+        this.memoUser = memoUser;
+        this.imageId = generateRandomNumber();
+        this.priority = priority;
+    }
+
     public void modify(String title){
         this.title = title;
     }
