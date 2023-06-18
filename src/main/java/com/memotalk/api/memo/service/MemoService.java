@@ -47,13 +47,16 @@ public class MemoService {
         return memoRepository.save(new Memo(workSpace, null, s3FileUrl));
     }
 
-    public void deleteMemo(Long memoId) {
-        Memo memo = memoRepository.findById(memoId)
-                        .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_MEMO));
-        if (memo.getS3FileUrl() != null){
-            fileService.fileDelete(memo.getS3FileUrl());
+    public void deleteMemo(List<Long> memoIdList) {
+
+        for (Long memoId : memoIdList){
+            Memo memo = memoRepository.findById(memoId)
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_MEMO));
+            if (memo.getS3FileUrl() != null){
+                fileService.fileDelete(memo.getS3FileUrl());
+            }
+            memoRepository.delete(memo);
         }
-        memoRepository.delete(memo);
     }
 
     public Memo markMemoImportant(MemoMarkImportantRequestDTO memoMarkImportantRequestDTO) {
@@ -67,5 +70,9 @@ public class MemoService {
         return memoRepository.findAllByWorkspace_IdAndDescriptionContainingOrderByCreatedAtDesc(workspaceId, keyword)
                 .stream().map(MemoResponseDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    public void deleteAllMemo() {
+        memoRepository.deleteAll();
     }
 }

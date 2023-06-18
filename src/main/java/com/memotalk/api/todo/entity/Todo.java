@@ -58,4 +58,8 @@ public class Todo {
         if(this.status.equals(Status.TODO)) this.status = Status.DONE;
         if(this.status.equals(Status.DONE)) this.status = Status.TODO;
     }
+
+    public void update(String description){
+        this.description = description;
+    }
 }

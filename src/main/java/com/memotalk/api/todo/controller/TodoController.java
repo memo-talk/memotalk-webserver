@@ -40,6 +40,17 @@ public class TodoController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @Operation(summary = "할 일 수정 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "할 일 수정 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식")
+    })
+    @PatchMapping("/update")
+    public ResponseEntity<Void> update(@RequestBody @Valid TodoRequestDTO requestDTO){
+        todoService.update(requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @Operation(summary = "할 일 조회 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "할 일 조회 성공"),

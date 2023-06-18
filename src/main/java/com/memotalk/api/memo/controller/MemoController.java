@@ -1,9 +1,6 @@
 package com.memotalk.api.memo.controller;
 
-import com.memotalk.api.memo.dto.MemoDeleteRequestDTO;
-import com.memotalk.api.memo.dto.MemoMarkImportantRequestDTO;
-import com.memotalk.api.memo.dto.MemoRequestDTO;
-import com.memotalk.api.memo.dto.MemoResponseDTO;
+import com.memotalk.api.memo.dto.*;
 import com.memotalk.api.memo.service.MemoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -28,13 +25,28 @@ public class MemoController {
 
     @MessageMapping(value = "/memo/delete")
     public void deleteMessage(@Valid MemoDeleteRequestDTO memoDeleteRequestDto) {
-        memoService.deleteMemo(memoDeleteRequestDto.getMemoId());
-        messagingTemplate.convertAndSend(DESTINATION + memoDeleteRequestDto.getWorkspaceId(), memoDeleteRequestDto.getMemoId());
+        memoService.deleteMemo(memoDeleteRequestDto.getMemoIdList());
+        messagingTemplate.convertAndSend(DESTINATION + memoDeleteRequestDto.getWorkspaceId()
+                , new MemoDeleteResponseDTO("워크스페이스" + memoDeleteRequestDto.getWorkspaceId()
+                        + " 의 메모아이디 " + memoDeleteRequestDto.getMemoIdList() + " 에 해당하는 메모가 삭제되었습니다."));
+    }
+
+    @MessageMapping(value = "/memo/delete/all")
+    public void deleteAllMessage(@Valid MemoDeleteRequestDTO memoDeleteRequestDto) {
+        memoService.deleteAllMemo();
+        messagingTemplate.convertAndSend(DESTINATION + memoDeleteRequestDto.getWorkspaceId()
+                , new MemoDeleteResponseDTO("워크스페이스" + memoDeleteRequestDto.getWorkspaceId()  + " 의 모든 메모가 삭제되었습니다."));
     }
 
     @MessageMapping(value = "/memo/mark-important")
     public void markMemoImportant(@Valid MemoMarkImportantRequestDTO memoMarkImportantRequestDTO) {
         MemoResponseDTO responseDTO = new MemoResponseDTO(memoService.markMemoImportant(memoMarkImportantRequestDTO));
+        messagingTemplate.convertAndSend(DESTINATION + memoMarkImportantRequestDTO.getWorkspaceId(), responseDTO);
+    }
+
+    @MessageMapping(value = "/memo/convert-todo")
+    public void convertTodo(@Valid ConvertReqeustDTO convertReqeustDTO) {
+        MemoResponseDTO responseDTO = new MemoResponseDTO(memoService.markMemoImportant(convertReqeustDTO));
         messagingTemplate.convertAndSend(DESTINATION + memoMarkImportantRequestDTO.getWorkspaceId(), responseDTO);
     }
 }

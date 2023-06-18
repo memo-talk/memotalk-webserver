@@ -59,4 +59,8 @@ public class TodoService {
     public void deleteAll(String email, Long workspaceId) {
         todoRepository.deleteAllByWorkspace_MemoUser_EmailAndWorkspace_Id(email, workspaceId);
     }
+
+    public void update(TodoRequestDTO requestDTO) {
+        todoRepository.findByWorkspace_Id(requestDTO.getWorkspaceId()).update(requestDTO.getContent());
+    }
 }

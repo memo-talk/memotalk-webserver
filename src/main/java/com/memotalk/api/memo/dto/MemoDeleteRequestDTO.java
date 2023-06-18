@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,5 +18,5 @@ public class MemoDeleteRequestDTO {
     private Long workspaceId;
 
     @NotNull
-    private Long memoId;
+    private List<Long> memoIdList;
 }
