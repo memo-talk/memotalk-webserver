@@ -53,7 +53,8 @@ public class Memo {
         this.s3FileUrl = s3FileUrl;
     }
 
-    public void markImportant(){
+    public Memo markImportant(){
         this.isImportant = !this.isImportant;
+        return this;
     }
 }

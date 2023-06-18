@@ -40,6 +40,17 @@ public class TodoController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @Operation(summary = "할 일 수정 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "할 일 수정 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식")
+    })
+    @PatchMapping("/update")
+    public ResponseEntity<Void> update(@RequestBody @Valid TodoRequestDTO requestDTO){
+        todoService.update(requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @Operation(summary = "할 일 조회 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "할 일 조회 성공"),
@@ -61,6 +72,19 @@ public class TodoController {
     @DeleteMapping("/delete/{todoId}")
     public ResponseEntity<Void> delete(@Parameter(hidden = true) @AuthenticationPrincipal String email, @PathVariable Long todoId){
         todoService.delete(email, todoId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "할 일 전체 삭제 API")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "할 일 전체 삭제 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "404", description = "워크 스페이스를 찾을 수 없음")
+    })
+    @DeleteMapping("/delete-all/{workspaceId}")
+    public ResponseEntity<Void> deleteAll(@Parameter(hidden = true) @AuthenticationPrincipal String email, @PathVariable Long workspaceId){
+        todoService.deleteAll(email, workspaceId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

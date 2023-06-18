@@ -1,5 +1,6 @@
 package com.memotalk.api.memouser.controller;
 
+import com.memotalk.api.email.dto.AuthCodeRequestDTO;
 import com.memotalk.api.memouser.dto.*;
 import com.memotalk.api.memouser.entity.UserRefreshToken;
 import com.memotalk.api.memouser.respository.UserRefreshTokenRepository;
@@ -122,6 +123,7 @@ public class MemoUserController {
     }
 
     @Operation(summary = "리프레시 토큰 API")
+    @SecurityRequirement(name = "Bearer Authentication")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "리프레시 성공",
                     content = @Content(schema = @Schema(implementation = MemoUserSigninResponseDTO.class))),
@@ -139,5 +141,16 @@ public class MemoUserController {
         MemoUserSigninResponseDTO responseDTO = memoUserService.refresh(dto.getRefreshToken(), accessToken);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+    }
+
+    @Operation(summary = "이메일 유효성 체킹 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일 유효성 체킹 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식 or 유효하지 않은 이메일")
+    })
+    @PostMapping("/validate-email")
+    public ResponseEntity<Void> validateEmail(@Valid @RequestBody AuthCodeRequestDTO dto) {
+        memoUserService.validateEmail(dto.getEmail());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

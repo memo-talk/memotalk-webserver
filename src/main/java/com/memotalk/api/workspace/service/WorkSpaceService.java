@@ -6,6 +6,7 @@ import com.memotalk.api.memouser.entity.MemoUser;
 import com.memotalk.api.memouser.respository.MemoUserRepository;
 import com.memotalk.api.workspace.dto.WorkSpaceModifyRequestDTO;
 import com.memotalk.api.workspace.entity.WorkSpace;
+import com.memotalk.exception.NoAuthException;
 import com.memotalk.exception.NotFoundException;
 import com.memotalk.exception.enumeration.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +23,18 @@ public class WorkSpaceService {
 
     private final WorkSpaceRepository workSpaceRepository;
     private final MemoUserRepository memoUserRepository;
-
+    private static final long INIT_PRIORITY = 9999L;
+    private static final long NEXT_ORDER = 1;
     public void create(String email) {
         MemoUser memoUser = memoUserRepository.findByEmail(email).orElseThrow(
                 () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
         );
-        workSpaceRepository.save(new WorkSpace(memoUser));
+
+        long priority = workSpaceRepository.findDistinctTopByMemoUser_EmailOrderByPriorityDesc(email)
+                .map(WorkSpace::getPriority)
+                .orElse(INIT_PRIORITY);
+
+        workSpaceRepository.save(new WorkSpace(memoUser, priority + NEXT_ORDER));
     }
 
     public void modify(String email, WorkSpaceModifyRequestDTO requestDTO) {
@@ -43,16 +50,23 @@ public class WorkSpaceService {
 
     @Transactional(readOnly = true)
     public List<WorkSpaceResponseDTO> getList(String email) {
-        return workSpaceRepository.findAllByMemoUser_Email(email).stream()
+        if(!memoUserRepository.existsByEmail(email)){
+            throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+
+        return workSpaceRepository.findAllByMemoUser_EmailOrderByPriorityAsc(email).stream()
                 .map(WorkSpaceResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
     public void moveTopWorkspace(String email, Long workspaceId){
-        Long recentId = workSpaceRepository.findMaxIdByMemoUser_Email(email);
+        long priority = workSpaceRepository.findDistinctTopByMemoUser_EmailOrderByPriorityAsc(email)
+                .map(WorkSpace::getPriority)
+                .orElse(INIT_PRIORITY);
+
         workSpaceRepository.findById(workspaceId).orElseThrow(
                 () -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND)
-        ).moveTop(recentId);
+        ).moveTop(priority);
     }
 
     @Transactional(readOnly = true)

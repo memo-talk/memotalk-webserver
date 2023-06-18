@@ -34,6 +34,7 @@ import java.util.Date;
 public class MemoUserService {
 
     private static final long THREE_DAYS_MSEC = 259200000;
+    private static final long INIT_PRIORITY = 10000L;
     private final MemoUserRepository memoUserRepository;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -43,7 +44,7 @@ public class MemoUserService {
     public void signup(MemoUserSignupRequestDTO dto) {
         validateEmailNotExists(dto.getEmail());
         MemoUser saved = memoUserRepository.save(new MemoUser(dto.getEmail(), passwordEncoder.encode(dto.getPassword())));
-        workSpaceRepository.save(new WorkSpace(saved));
+        workSpaceRepository.save(new WorkSpace(saved, INIT_PRIORITY));
     }
 
     public MemoUserSigninResponseDTO signin(MemoUserSigninRequestDTO requestDTO) {
@@ -71,6 +72,12 @@ public class MemoUserService {
         }
 
         return new MemoUserSigninResponseDTO(accessToken, refreshToken);
+    }
+
+    public void validateEmail(String email){
+        if(!memoUserRepository.existsByEmail(email)){
+            throw new BadRequestException(ErrorCode.NOT_FOUND_EMAIL);
+        }
     }
 
     private void validateEmailNotExists(String email){

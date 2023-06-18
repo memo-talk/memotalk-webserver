@@ -48,6 +48,9 @@ public class WorkSpace {
     @UpdateTimestamp
     private LocalDateTime modifiedAt;
 
+    @Column
+    private Long priority;
+
     @JsonIgnore
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Memo> memoList;
@@ -57,20 +60,21 @@ public class WorkSpace {
     private List<Todo> todoList;
 
     @Transient
-    private Random random;
+    private Random random = new Random();
 
-    public WorkSpace(MemoUser memoUser){
+    public WorkSpace(MemoUser memoUser, Long priority){
         this.title = "워크 스페이스";
         this.memoUser = memoUser;
         this.imageId = generateRandomNumber();
+        this.priority = priority;
     }
 
     public void modify(String title){
         this.title = title;
     }
 
-    public void moveTop(Long recentId){
-        this.id = recentId + 1L;
+    public void moveTop(Long priority){
+        this.priority = priority - 1L;
     }
 
     private int generateRandomNumber() {
