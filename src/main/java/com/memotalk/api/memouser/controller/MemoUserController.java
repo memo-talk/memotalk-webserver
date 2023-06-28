@@ -29,8 +29,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.Date;
-
 
 @RestController
 @RequestMapping("/api/v1/memo-user")
@@ -40,6 +38,9 @@ import java.util.Date;
 public class MemoUserController {
 
     private final MemoUserService memoUserService;
+    @Value("${jwt.refresh-expiration-in-ms}")
+    private int refreshTokenExpirationTime;
+    private static final String REFRESH_TOKEN = "refreshToken";
 
     @Operation(summary = "회원 가입 API")
     @ApiResponses(value = {
@@ -61,8 +62,17 @@ public class MemoUserController {
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @PostMapping("/signin")
-    public ResponseEntity<MemoUserSigninResponseDTO> signin(@Valid @RequestBody MemoUserSigninRequestDTO requestDTO) {
+    public ResponseEntity<MemoUserSigninResponseDTO> signin(@Valid @RequestBody MemoUserSigninRequestDTO requestDTO, HttpServletResponse response) {
         MemoUserSigninResponseDTO responseDTO = memoUserService.signin(requestDTO);
+
+        // 리프레시 토큰을 쿠키에 저장
+        Cookie refreshTokenCookie = new Cookie("refreshToken", responseDTO.getRefreshToken());
+        refreshTokenCookie.setMaxAge(refreshTokenExpirationTime); // 리프레시 토큰 만료 시간 설정
+        refreshTokenCookie.setPath("/"); // 쿠키 경로 설정
+        refreshTokenCookie.setHttpOnly(true); // 자바스크립트에서 쿠키 접근 제한
+        refreshTokenCookie.setSecure(true); // HTTPS만 허용
+        response.addCookie(refreshTokenCookie);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
@@ -133,12 +143,14 @@ public class MemoUserController {
     @PostMapping("/refresh")
     public ResponseEntity<MemoUserSigninResponseDTO> refreshToken (
             HttpServletRequest request,
-            @Valid @RequestBody RefreshRequestDTO dto,
             @Parameter(hidden = true) @AuthenticationPrincipal String email) {
 
         // access token 확인
         String accessToken = HeaderUtil.getAccessToken(request);
-        MemoUserSigninResponseDTO responseDTO = memoUserService.refresh(dto.getRefreshToken(), accessToken);
+        String refreshToken = CookieUtil.getCookie(request, REFRESH_TOKEN)
+                .map(Cookie::getValue)
+                .orElse((null));
+        MemoUserSigninResponseDTO responseDTO = memoUserService.refresh(refreshToken, accessToken, email);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }

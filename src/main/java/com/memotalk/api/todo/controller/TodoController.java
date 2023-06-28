@@ -2,6 +2,7 @@ package com.memotalk.api.todo.controller;
 
 import com.memotalk.api.todo.dto.TodoRequestDTO;
 import com.memotalk.api.todo.dto.TodoResponseDTO;
+import com.memotalk.api.todo.dto.TodoUpdateRequestDTO;
 import com.memotalk.api.todo.service.TodoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,7 +47,7 @@ public class TodoController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 형식")
     })
     @PatchMapping("/update")
-    public ResponseEntity<Void> update(@RequestBody @Valid TodoRequestDTO requestDTO){
+    public ResponseEntity<Void> update(@RequestBody @Valid TodoUpdateRequestDTO requestDTO){
         todoService.update(requestDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

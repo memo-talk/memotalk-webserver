@@ -1,5 +1,6 @@
 package com.memotalk.api.workspace.controller;
 
+import com.memotalk.api.memouser.dto.MemoGroupByDateDTO;
 import com.memotalk.api.workspace.dto.WorkSpaceModifyRequestDTO;
 import com.memotalk.api.workspace.dto.WorkSpaceResponseDTO;
 import com.memotalk.api.workspace.service.WorkSpaceService;
@@ -109,8 +110,8 @@ public class WorkSpaceController {
             @ApiResponse(responseCode = "404", description = "워크스페이스를 찾을 수 없음")
     })
     @GetMapping("/memo-list/{workspaceId}")
-    public ResponseEntity<List<MemoResponseDTO>> getMemoList(@PathVariable Long workspaceId){
-        List<MemoResponseDTO> memoResponseDTOList = memoService.getMemoList(workspaceId);
+    public ResponseEntity<List<MemoGroupByDateDTO>> getMemoList(@PathVariable Long workspaceId){
+        List<MemoGroupByDateDTO> memoResponseDTOList = memoService.getMemoList(workspaceId);
         return ResponseEntity.status(HttpStatus.OK).body(memoResponseDTOList);
     }
 

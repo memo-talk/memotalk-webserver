@@ -18,7 +18,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     List<Todo> findAllByWorkspace_IdAndStatus(Long workspaceId, Status done);
 
     void deleteAllByWorkspace_MemoUser_EmailAndWorkspace_Id(String email, Long workspaceId);
-    Todo findByWorkspace_Id(Long workspaceId);
+    Todo findByIdAndWorkspace_Id(Long todoId, Long workspaceId);
 
     @Modifying
     @Query("DELETE FROM Todo t WHERE t.status = 'Done' AND t.workspace.memoUser.id = :memoUserId AND t.workspace.id = :workspaceId")

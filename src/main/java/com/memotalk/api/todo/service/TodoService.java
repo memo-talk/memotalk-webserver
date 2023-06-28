@@ -2,6 +2,7 @@ package com.memotalk.api.todo.service;
 
 import com.memotalk.api.todo.dto.TodoRequestDTO;
 import com.memotalk.api.todo.dto.TodoResponseDTO;
+import com.memotalk.api.todo.dto.TodoUpdateRequestDTO;
 import com.memotalk.api.todo.entity.Todo;
 import com.memotalk.api.todo.entity.enumeration.Status;
 import com.memotalk.api.todo.respository.TodoRepository;
@@ -60,8 +61,8 @@ public class TodoService {
         todoRepository.deleteAllByWorkspace_MemoUser_EmailAndWorkspace_Id(email, workspaceId);
     }
 
-    public void update(TodoRequestDTO requestDTO) {
-        todoRepository.findByWorkspace_Id(requestDTO.getWorkspaceId()).update(requestDTO.getContent());
+    public void update(TodoUpdateRequestDTO requestDTO) {
+        todoRepository.findByIdAndWorkspace_Id(requestDTO.getTodoId(), requestDTO.getWorkspaceId()).update(requestDTO.getContent());
     }
 
     public void deleteDoneTodo(Long workspaceId, String email) {

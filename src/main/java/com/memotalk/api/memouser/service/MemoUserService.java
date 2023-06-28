@@ -105,7 +105,7 @@ public class MemoUserService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
-    public MemoUserSigninResponseDTO refresh(String refreshToken, String accessToken) {
+    public MemoUserSigninResponseDTO refresh(String refreshToken, String accessToken, String email) {
 
         if (!tokenProvider.validate(accessToken)) {
             throw new NotFoundException(ErrorCode.INVALID_ACCESS_TOKEN);
@@ -120,7 +120,6 @@ public class MemoUserService {
             throw new NotFoundException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        String email = claims.getSubject();
         Long userId = memoUserRepository.findByEmail(email).orElseThrow(
                 () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
         ).getId();

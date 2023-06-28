@@ -3,6 +3,7 @@ package com.memotalk.api.memo.service;
 import com.memotalk.api.memo.dto.*;
 import com.memotalk.api.memo.entity.Memo;
 import com.memotalk.api.memo.respository.MemoRepository;
+import com.memotalk.api.memouser.dto.MemoGroupByDateDTO;
 import com.memotalk.api.memouser.entity.MemoUser;
 import com.memotalk.api.memouser.respository.MemoUserRepository;
 import com.memotalk.api.workspace.entity.WorkSpace;
@@ -13,7 +14,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,10 +35,24 @@ public class MemoService {
     private static final long NEXT_ORDER = 1;
 
     @Transactional(readOnly = true)
-    public List<MemoResponseDTO> getMemoList(Long workspaceId) {
-        return memoRepository.findAllByWorkspace_Id(workspaceId)
-                .stream().map(MemoResponseDTO::new)
-                .collect(Collectors.toList());
+    public List<MemoGroupByDateDTO> getMemoList(Long workspaceId) {
+        List<Memo> memos = memoRepository.findAllByWorkspace_Id(workspaceId);
+
+        Map<LocalDate, Map<LocalTime, List<Memo>>> groupedMemos = memos.stream()
+                .collect(Collectors.groupingBy(memo -> memo.getCreatedAt().toLocalDate(),
+                        Collectors.groupingBy(memo -> memo.getCreatedAt().toLocalTime().truncatedTo(ChronoUnit.MINUTES))));
+
+        List<MemoGroupByDateDTO> groupedMemosDTO = new ArrayList<>();
+        for (Map.Entry<LocalDate, Map<LocalTime, List<Memo>>> dateEntry : groupedMemos.entrySet()) {
+            Map<LocalTime, List<MemoResponseDTO>> timeToMemos = new HashMap<>();
+            for (Map.Entry<LocalTime, List<Memo>> timeEntry : dateEntry.getValue().entrySet()) {
+                List<MemoResponseDTO> memoDTOs = timeEntry.getValue().stream().map(MemoResponseDTO::new).collect(Collectors.toList());
+                timeToMemos.put(timeEntry.getKey(), memoDTOs);
+            }
+            groupedMemosDTO.add(new MemoGroupByDateDTO(dateEntry.getKey(), timeToMemos));
+        }
+
+        return groupedMemosDTO;
     }
 
     public Memo createMemo(MemoRequestDTO memoRequestDto) {
