@@ -60,7 +60,7 @@ public class CookieUtil {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
-                .domain("memotalk.me")
+                .domain(".memotalk.shop")
                 .path("/")
                 .build();
         response.addHeader(SET_COOKIE, cookie.toString());

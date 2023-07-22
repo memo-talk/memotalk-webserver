@@ -62,21 +62,15 @@ public class MemoUserController {
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @PostMapping("/signin")
-    public ResponseEntity<MemoUserSigninResponseDTO> signin(@Valid @RequestBody MemoUserSigninRequestDTO requestDTO, HttpServletResponse response) {
+    public ResponseEntity<MemoUserSigninResponseDTO> signin(@Valid @RequestBody MemoUserSigninRequestDTO requestDTO, HttpServletResponse response, HttpServletRequest request) {
         MemoUserSigninResponseDTO responseDTO = memoUserService.signin(requestDTO);
-
-        // 리프레시 토큰을 쿠키에 저장
-        Cookie refreshTokenCookie = new Cookie("refreshToken", responseDTO.getRefreshToken());
-        refreshTokenCookie.setMaxAge(refreshTokenExpirationTime); // 리프레시 토큰 만료 시간 설정
-        refreshTokenCookie.setPath("/"); // 쿠키 경로 설정
-        refreshTokenCookie.setHttpOnly(true); // 자바스크립트에서 쿠키 접근 제한
-        refreshTokenCookie.setSecure(true); // HTTPS만 허용
-        response.addCookie(refreshTokenCookie);
+        CookieUtil.addSameSiteCookie(response, REFRESH_TOKEN, responseDTO.getRefreshToken(), refreshTokenExpirationTime);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @Operation(summary = "내 정보 불러오기 API")
+    @SecurityRequirement(name = "Bearer Authentication")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "내 정보 불러오기 성공",
                     content = @Content(schema = @Schema(implementation = MemoUserSigninResponseDTO.class))),
@@ -85,6 +79,7 @@ public class MemoUserController {
     })
     @GetMapping("/info")
     public ResponseEntity<MemoUserResponseDTO> info(@Parameter(hidden = true) @AuthenticationPrincipal String email) {
+        log.info("이메일 : {}", email);
         MemoUserResponseDTO responseDTO = memoUserService.info(email);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
@@ -142,15 +137,14 @@ public class MemoUserController {
     })
     @PostMapping("/refresh")
     public ResponseEntity<MemoUserSigninResponseDTO> refreshToken (
-            HttpServletRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal String email) {
+            HttpServletRequest request) {
 
         // access token 확인
         String accessToken = HeaderUtil.getAccessToken(request);
         String refreshToken = CookieUtil.getCookie(request, REFRESH_TOKEN)
                 .map(Cookie::getValue)
                 .orElse((null));
-        MemoUserSigninResponseDTO responseDTO = memoUserService.refresh(refreshToken, accessToken, email);
+        MemoUserSigninResponseDTO responseDTO = memoUserService.refresh(refreshToken, accessToken);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
@@ -162,7 +156,19 @@ public class MemoUserController {
     })
     @PostMapping("/validate-email")
     public ResponseEntity<Void> validateEmail(@Valid @RequestBody AuthCodeRequestDTO dto) {
-        memoUserService.validateEmail(dto.getEmail());
+        memoUserService.validateEmailNotExists(dto.getEmail());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "패스워드 유효성 체킹 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "패스워드 유효성 체킹 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식 or 유효하지 않은 패스워드")
+    })
+    @PostMapping("/validate-password")
+    public ResponseEntity<Void> validatePassword(@Parameter(hidden = true) @AuthenticationPrincipal String email,
+                                                 @Valid @RequestBody MemoUserUnlockRequestDTO dto) {
+        memoUserService.validatePassword(email, dto.getPassword());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

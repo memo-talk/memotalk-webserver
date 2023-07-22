@@ -17,10 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,20 +35,28 @@ public class MemoService {
     public List<MemoGroupByDateDTO> getMemoList(Long workspaceId) {
         List<Memo> memos = memoRepository.findAllByWorkspace_Id(workspaceId);
 
-        Map<LocalDate, Map<LocalTime, List<Memo>>> groupedMemos = memos.stream()
+        TreeMap<LocalDate, TreeMap<LocalTime, List<Memo>>> groupedMemos = memos.stream()
                 .collect(Collectors.groupingBy(memo -> memo.getCreatedAt().toLocalDate(),
-                        Collectors.groupingBy(memo -> memo.getCreatedAt().toLocalTime().truncatedTo(ChronoUnit.MINUTES))));
+                                TreeMap::new,
+                                Collectors.groupingBy(memo -> memo.getCreatedAt().toLocalTime().truncatedTo(ChronoUnit.MINUTES),
+                                        TreeMap::new,
+                                        Collectors.collectingAndThen(
+                                                Collectors.toCollection(() ->
+                                                        new TreeSet<>(Comparator.comparing(Memo::getId).reversed())),
+                                                ArrayList::new)
+                                )
+                        )
+                );
 
         List<MemoGroupByDateDTO> groupedMemosDTO = new ArrayList<>();
-        for (Map.Entry<LocalDate, Map<LocalTime, List<Memo>>> dateEntry : groupedMemos.entrySet()) {
-            Map<LocalTime, List<MemoResponseDTO>> timeToMemos = new HashMap<>();
+        for (Map.Entry<LocalDate, TreeMap<LocalTime, List<Memo>>> dateEntry : groupedMemos.descendingMap().entrySet()) {
+            Map<LocalTime, List<MemoResponseDTO>> timeToMemos = new LinkedHashMap<>();
             for (Map.Entry<LocalTime, List<Memo>> timeEntry : dateEntry.getValue().entrySet()) {
                 List<MemoResponseDTO> memoDTOs = timeEntry.getValue().stream().map(MemoResponseDTO::new).collect(Collectors.toList());
                 timeToMemos.put(timeEntry.getKey(), memoDTOs);
             }
             groupedMemosDTO.add(new MemoGroupByDateDTO(dateEntry.getKey(), timeToMemos));
         }
-
         return groupedMemosDTO;
     }
 
@@ -96,12 +101,12 @@ public class MemoService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteAllMemo() {
-        memoRepository.deleteAll();
+    public void deleteAllMemo(Long workspaceId) {
+        memoRepository.deleteAllByWorkspace_Id(workspaceId);
     }
 
     public void convertTodo(ConvertReqeustDTO convertReqeustDTO) {
-        Memo memo = memoRepository.findByWorkspace_Id(convertReqeustDTO.getWorkspaceId());
+        Memo memo = memoRepository.findByWorkspace_Id(convertReqeustDTO.getMemoId());
 
         MemoUser memoUser = memoUserRepository.findByEmail(convertReqeustDTO.getEmail()).orElseThrow(
                 () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)

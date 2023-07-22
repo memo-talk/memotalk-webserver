@@ -26,6 +26,10 @@ public class WorkSpaceService {
     private static final long INIT_PRIORITY = 9999L;
     private static final long NEXT_ORDER = 1;
     public void create(String email) {
+        if(!memoUserRepository.existsByEmail(email)){
+            throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+
         MemoUser memoUser = memoUserRepository.findByEmail(email).orElseThrow(
                 () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
         );
@@ -38,12 +42,20 @@ public class WorkSpaceService {
     }
 
     public void modify(String email, WorkSpaceModifyRequestDTO requestDTO) {
+        if(!memoUserRepository.existsByEmail(email)){
+            throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+
         workSpaceRepository.findByIdAndMemoUser_Email(requestDTO.getId(), email).orElseThrow(
                 () -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND)
         ).modify(requestDTO.getNewTitle());
     }
 
     public void delete(String email, Long workspaceId) {
+        if(!memoUserRepository.existsByEmail(email)){
+            throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+
         workSpaceRepository.deleteByIdAndMemoUser_Email(workspaceId, email).orElseThrow(
                 () -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND));
     }
@@ -60,6 +72,10 @@ public class WorkSpaceService {
     }
 
     public void moveTopWorkspace(String email, Long workspaceId){
+        if(!memoUserRepository.existsByEmail(email)){
+            throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+
         long priority = workSpaceRepository.findDistinctTopByMemoUser_EmailOrderByPriorityAsc(email)
                 .map(WorkSpace::getPriority)
                 .orElse(INIT_PRIORITY);
@@ -71,6 +87,10 @@ public class WorkSpaceService {
 
     @Transactional(readOnly = true)
     public WorkSpaceResponseDTO getWorkspace(String email, Long workspaceId) {
+        if(!memoUserRepository.existsByEmail(email)){
+            throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+
         WorkSpace workSpace = workSpaceRepository.findByIdAndMemoUser_Email(workspaceId, email).orElseThrow(
                 () -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND));
 

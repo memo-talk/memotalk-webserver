@@ -13,4 +13,5 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
     List<Memo> findAllByWorkspace_IdAndDescriptionContainingOrderByCreatedAtDesc(Long workspaceId, String keyword);
 
     Memo findByWorkspace_Id(Long workspaceId);
+    void deleteAllByWorkspace_Id(Long workspaceId);
 }

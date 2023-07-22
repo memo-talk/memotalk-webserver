@@ -1,6 +1,5 @@
 package com.memotalk.api.memouser.service;
 
-import com.memotalk.api.memo.entity.Memo;
 import com.memotalk.api.memouser.dto.*;
 import com.memotalk.api.memouser.entity.UserRefreshToken;
 import com.memotalk.api.memouser.respository.UserRefreshTokenRepository;
@@ -18,7 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.Cookie;
 import java.util.Date;
 
 @Service
@@ -64,6 +62,9 @@ public class MemoUserService {
             userRefreshTokenRepository.saveAndFlush(userRefreshToken);
         }
 
+        // 잠금모드 해제
+        memoUser.unlock();
+
         return new MemoUserSigninResponseDTO(accessToken, refreshToken);
     }
 
@@ -73,7 +74,7 @@ public class MemoUserService {
         }
     }
 
-    private void validateEmailNotExists(String email){
+    public void validateEmailNotExists(String email){
         if(memoUserRepository.existsByEmail(email)){
             throw new BadRequestException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -105,7 +106,7 @@ public class MemoUserService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
-    public MemoUserSigninResponseDTO refresh(String refreshToken, String accessToken, String email) {
+    public MemoUserSigninResponseDTO refresh(String refreshToken, String accessToken) {
 
         if (!tokenProvider.validate(accessToken)) {
             throw new NotFoundException(ErrorCode.INVALID_ACCESS_TOKEN);
@@ -119,6 +120,8 @@ public class MemoUserService {
         if (!tokenProvider.validateToken(refreshToken)) {
             throw new NotFoundException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
+
+        String email = claims.getSubject();
 
         Long userId = memoUserRepository.findByEmail(email).orElseThrow(
                 () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
@@ -144,5 +147,15 @@ public class MemoUserService {
         }
 
         return new MemoUserSigninResponseDTO(newAccessToken, refreshToken);
+    }
+
+    public void validatePassword(String email, String password) {
+        MemoUser memoUser = memoUserRepository.findByEmail(email).orElseThrow(
+                () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
+        );
+
+        if (!passwordEncoder.matches(password, memoUser.getPassword())){
+            throw new BadRequestException(ErrorCode.PASSWORD_MISMATCH);
+        }
     }
 }

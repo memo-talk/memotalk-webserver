@@ -1,5 +1,6 @@
 package com.memotalk.api.todo.controller;
 
+import com.memotalk.api.todo.dto.TodoGroupByDateDTO;
 import com.memotalk.api.todo.dto.TodoRequestDTO;
 import com.memotalk.api.todo.dto.TodoResponseDTO;
 import com.memotalk.api.todo.dto.TodoUpdateRequestDTO;
@@ -112,8 +113,8 @@ public class TodoController {
             @ApiResponse(responseCode = "404", description = "워크스페이스를 찾을 수 없음")
     })
     @GetMapping("/todo-list/{workspaceId}")
-    public ResponseEntity<List<TodoResponseDTO>> getTodoList(@PathVariable Long workspaceId) {
-        List<TodoResponseDTO> todoResponseDTOList = todoService.getTodoList(workspaceId);
+    public ResponseEntity<List<TodoGroupByDateDTO>> getTodoList(@PathVariable Long workspaceId) {
+        List<TodoGroupByDateDTO> todoResponseDTOList = todoService.getTodoList(workspaceId);
         return ResponseEntity.status(HttpStatus.OK).body(todoResponseDTOList);
     }
 

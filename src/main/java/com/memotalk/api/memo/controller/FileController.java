@@ -4,7 +4,6 @@ import com.memotalk.api.memo.dto.FileUploadRequestDTO;
 import com.memotalk.api.memo.dto.MemoResponseDTO;
 import com.memotalk.api.memo.entity.Memo;
 import com.memotalk.api.memo.service.MemoService;
-import com.memotalk.api.memouser.dto.MemoUserSignupRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

@@ -1,5 +1,6 @@
 package com.memotalk.api.todo.service;
 
+import com.memotalk.api.todo.dto.TodoGroupByDateDTO;
 import com.memotalk.api.todo.dto.TodoRequestDTO;
 import com.memotalk.api.todo.dto.TodoResponseDTO;
 import com.memotalk.api.todo.dto.TodoUpdateRequestDTO;
@@ -14,7 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,10 +27,32 @@ import java.util.stream.Collectors;
 public class TodoService {
     private final WorkSpaceRepository workSpaceRepository;
     private final TodoRepository todoRepository;
-    public List<TodoResponseDTO> getTodoList(Long workspaceId) {
-        return todoRepository.findAllByWorkspace_IdAndStatus(workspaceId, Status.TODO)
-                .stream().map(TodoResponseDTO::new)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<TodoGroupByDateDTO> getTodoList(Long workspaceId) {
+        List<Todo> todos = todoRepository.findAllByWorkspace_IdAndStatus(workspaceId, Status.TODO);
+
+        TreeMap<LocalDate, TreeMap<LocalTime, List<Todo>>> groupedTodos = todos.stream()
+                .collect(Collectors.groupingBy(todo -> todo.getCreatedAt().toLocalDate(),
+                                TreeMap::new,
+                                Collectors.groupingBy(todo -> todo.getCreatedAt().toLocalTime().truncatedTo(ChronoUnit.MINUTES),
+                                        TreeMap::new,
+                                        Collectors.collectingAndThen(
+                                                Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(Todo::getId).reversed())),
+                                                ArrayList::new)
+                                )
+                        )
+                );
+
+        List<TodoGroupByDateDTO> groupedTodosDTO = new ArrayList<>();
+        for (Map.Entry<LocalDate, TreeMap<LocalTime, List<Todo>>> dateEntry : groupedTodos.descendingMap().entrySet()) {
+            Map<LocalTime, List<TodoResponseDTO>> timeToTodos = new LinkedHashMap<>();
+            for (Map.Entry<LocalTime, List<Todo>> timeEntry : dateEntry.getValue().entrySet()) {
+                List<TodoResponseDTO> todoDTOs = timeEntry.getValue().stream().map(TodoResponseDTO::new).collect(Collectors.toList());
+                timeToTodos.put(timeEntry.getKey(), todoDTOs);
+            }
+            groupedTodosDTO.add(new TodoGroupByDateDTO(dateEntry.getKey(), timeToTodos));
+        }
+        return groupedTodosDTO;
     }
 
     public void create(TodoRequestDTO requestDTO) {

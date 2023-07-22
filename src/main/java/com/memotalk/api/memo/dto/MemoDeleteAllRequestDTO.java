@@ -11,9 +11,9 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ConvertReqeustDTO {
+public class MemoDeleteAllRequestDTO {
+
     @NotNull
-    private Long memoId;
-    @NotNull
-    private String email;
+    private Long workspaceId;
+
 }

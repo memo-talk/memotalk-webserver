@@ -32,10 +32,10 @@ public class MemoController {
     }
 
     @MessageMapping(value = "/memo/delete/all")
-    public void deleteAllMessage(@Valid MemoDeleteRequestDTO memoDeleteRequestDto) {
-        memoService.deleteAllMemo();
-        messagingTemplate.convertAndSend(DESTINATION + memoDeleteRequestDto.getWorkspaceId()
-                , new MemoDeleteResponseDTO("워크스페이스" + memoDeleteRequestDto.getWorkspaceId()  + " 의 모든 메모가 삭제되었습니다."));
+    public void deleteAllMessage(@Valid MemoDeleteAllRequestDTO memoDeleteAllRequestDto) {
+        memoService.deleteAllMemo(memoDeleteAllRequestDto.getWorkspaceId());
+        messagingTemplate.convertAndSend(DESTINATION + memoDeleteAllRequestDto.getWorkspaceId()
+                , new MemoDeleteResponseDTO("워크스페이스" + memoDeleteAllRequestDto.getWorkspaceId()  + " 의 모든 메모가 삭제되었습니다."));
     }
 
     @MessageMapping(value = "/memo/mark-important")
@@ -47,6 +47,6 @@ public class MemoController {
     @MessageMapping(value = "/memo/convert-todo")
     public void convertTodo(@Valid ConvertReqeustDTO convertReqeustDTO) {
         memoService.convertTodo(convertReqeustDTO);
-        messagingTemplate.convertAndSend(DESTINATION + convertReqeustDTO.getWorkspaceId(), "변환 완료");
+        messagingTemplate.convertAndSend(DESTINATION + convertReqeustDTO.getMemoId(), "변환 완료");
     }
 }
