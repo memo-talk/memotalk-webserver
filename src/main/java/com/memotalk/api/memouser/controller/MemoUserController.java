@@ -50,6 +50,18 @@ public class MemoUserController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @Operation(summary = "회원 탈퇴 API")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "회원 탈퇴 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식")
+    })
+    @PostMapping("/withdraw")
+    public ResponseEntity<Void> withdraw(@Parameter(hidden = true) @AuthenticationPrincipal String email) {
+        memoUserService.withdraw(email);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
     @Operation(summary = "로그인 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 성공",

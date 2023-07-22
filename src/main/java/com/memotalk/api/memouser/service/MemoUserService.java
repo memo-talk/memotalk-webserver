@@ -158,4 +158,11 @@ public class MemoUserService {
             throw new BadRequestException(ErrorCode.PASSWORD_MISMATCH);
         }
     }
+
+    public void withdraw(String email) {
+        MemoUser memoUser = memoUserRepository.findByEmail(email).orElseThrow(
+                () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
+        );
+        memoUserRepository.delete(memoUser);
+    }
 }
