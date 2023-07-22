@@ -10,7 +10,7 @@ import lombok.Setter;
 public class MemoDeleteResponseDTO {
     String message;
 
-    public MemoDeleteResponseDTO(String message){
+    public MemoDeleteResponseDTO(String message) {
         this.message = message;
     }
 }

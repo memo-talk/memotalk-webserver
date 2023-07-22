@@ -10,7 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
@@ -42,7 +45,7 @@ public class EmailController {
             @ApiResponse(responseCode = "500", description = "서버 에러 발생")
     })
     @PostMapping("/verify")
-    public ResponseEntity<Void> verifyAuthCode(@Valid @RequestBody AuthenticationCodeRequestDTO requestDTO){
+    public ResponseEntity<Void> verifyAuthCode(@Valid @RequestBody AuthenticationCodeRequestDTO requestDTO) {
         emailService.verifyAuthCode(requestDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

@@ -2,13 +2,9 @@ package com.memotalk.api.memouser.controller;
 
 import com.memotalk.api.email.dto.AuthCodeRequestDTO;
 import com.memotalk.api.memouser.dto.*;
-import com.memotalk.api.memouser.entity.UserRefreshToken;
-import com.memotalk.api.memouser.respository.UserRefreshTokenRepository;
 import com.memotalk.api.memouser.service.MemoUserService;
-import com.memotalk.config.jwt.TokenProvider;
 import com.memotalk.util.CookieUtil;
 import com.memotalk.util.HeaderUtil;
-import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -93,7 +89,7 @@ public class MemoUserController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     @PatchMapping("/lock")
-    public ResponseEntity<Void> lock(@Parameter(hidden = true) @AuthenticationPrincipal String email){
+    public ResponseEntity<Void> lock(@Parameter(hidden = true) @AuthenticationPrincipal String email) {
         memoUserService.lock(email);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -108,7 +104,7 @@ public class MemoUserController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     @PatchMapping("/unlock")
-    public ResponseEntity<Void> unlock(@Parameter(hidden = true) @AuthenticationPrincipal String email, @RequestBody MemoUserUnlockRequestDTO requestDTO){
+    public ResponseEntity<Void> unlock(@Parameter(hidden = true) @AuthenticationPrincipal String email, @RequestBody MemoUserUnlockRequestDTO requestDTO) {
         memoUserService.unlock(email, requestDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -122,7 +118,7 @@ public class MemoUserController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     @PatchMapping("/password-reset")
-    public ResponseEntity<Void> resetPassword(@Valid @RequestBody MemoUserPasswordResetRequestDTO requestDTO){
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody MemoUserPasswordResetRequestDTO requestDTO) {
         memoUserService.resetPassword(requestDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -136,7 +132,7 @@ public class MemoUserController {
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @PostMapping("/refresh")
-    public ResponseEntity<MemoUserSigninResponseDTO> refreshToken (
+    public ResponseEntity<MemoUserSigninResponseDTO> refreshToken(
             HttpServletRequest request) {
 
         // access token 확인

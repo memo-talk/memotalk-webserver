@@ -2,8 +2,8 @@ package com.memotalk.api.workspace.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.memotalk.api.memo.entity.Memo;
-import com.memotalk.api.todo.entity.Todo;
 import com.memotalk.api.memouser.entity.MemoUser;
+import com.memotalk.api.todo.entity.Todo;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -62,25 +62,25 @@ public class WorkSpace {
     @Transient
     private Random random = new Random();
 
-    public WorkSpace(MemoUser memoUser, Long priority){
+    public WorkSpace(MemoUser memoUser, Long priority) {
         this.title = "워크 스페이스";
         this.memoUser = memoUser;
         this.imageId = generateRandomNumber();
         this.priority = priority;
     }
 
-    public WorkSpace(MemoUser memoUser, Long priority, String title){
+    public WorkSpace(MemoUser memoUser, Long priority, String title) {
         this.title = title;
         this.memoUser = memoUser;
         this.imageId = generateRandomNumber();
         this.priority = priority;
     }
 
-    public void modify(String title){
+    public void modify(String title) {
         this.title = title;
     }
 
-    public void moveTop(Long priority){
+    public void moveTop(Long priority) {
         this.priority = priority - 1L;
     }
 

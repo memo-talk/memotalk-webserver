@@ -8,12 +8,12 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.memotalk.exception.InternalServerException;
 import com.memotalk.exception.enumeration.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -35,11 +35,11 @@ public class FileService {
         String fileName = generateFileName(multipartFile);
         ObjectMetadata metadata = createMetadata(multipartFile);
 
-        try(InputStream inputStream = multipartFile.getInputStream()){
+        try (InputStream inputStream = multipartFile.getInputStream()) {
             amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, inputStream, metadata)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
             return generateFileUrl(fileName);
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new InternalServerException(ErrorCode.FILE_UPLOAD_FAIL);
         }
     }
@@ -47,9 +47,11 @@ public class FileService {
     private String generateFileName(MultipartFile multipartFile) {
         return DIR_NAME + UUID.randomUUID() + multipartFile.getOriginalFilename();
     }
+
     private String generateFileUrl(String fileName) {
         return amazonS3Client.getUrl(bucket, fileName).toString();
     }
+
     private ObjectMetadata createMetadata(MultipartFile multipartFile) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(multipartFile.getContentType());

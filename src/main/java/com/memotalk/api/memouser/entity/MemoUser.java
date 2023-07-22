@@ -45,21 +45,21 @@ public class MemoUser {
     @OneToMany(mappedBy = "memoUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<WorkSpace> workSpaceList;
 
-    public MemoUser(String email, String password){
+    public MemoUser(String email, String password) {
         this.email = email;
         this.password = password;
         this.lock = Lock.UNLOCK;
     }
 
-    public void lock(){
+    public void lock() {
         this.lock = Lock.LOCK;
     }
 
-    public void unlock(){
+    public void unlock() {
         this.lock = Lock.UNLOCK;
     }
 
-    public void resetPassword(String password){
+    public void resetPassword(String password) {
         this.password = password;
     }
 }

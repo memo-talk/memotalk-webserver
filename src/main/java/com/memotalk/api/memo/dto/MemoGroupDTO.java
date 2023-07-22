@@ -1,7 +1,6 @@
 package com.memotalk.api.memo.dto;
 
 import com.memotalk.api.memo.entity.Memo;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

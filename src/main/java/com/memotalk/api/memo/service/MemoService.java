@@ -8,9 +8,12 @@ import com.memotalk.api.memouser.entity.MemoUser;
 import com.memotalk.api.memouser.respository.MemoUserRepository;
 import com.memotalk.api.workspace.entity.WorkSpace;
 import com.memotalk.api.workspace.respository.WorkSpaceRepository;
+import com.memotalk.exception.BadRequestException;
 import com.memotalk.exception.NotFoundException;
 import com.memotalk.exception.enumeration.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +70,7 @@ public class MemoService {
         return memoRepository.save(new Memo(workSpace, memoRequestDto.getContent(), null));
     }
 
-    public Memo uploadFile(FileUploadRequestDTO fileUploadRequestDTO){
+    public Memo uploadFile(FileUploadRequestDTO fileUploadRequestDTO) {
         WorkSpace workSpace = workSpaceRepository.findById(fileUploadRequestDTO.getWorkspaceId()).orElseThrow(
                 () -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND)
         );
@@ -78,10 +81,10 @@ public class MemoService {
 
     public void deleteMemo(List<Long> memoIdList) {
 
-        for (Long memoId : memoIdList){
+        for (Long memoId : memoIdList) {
             Memo memo = memoRepository.findById(memoId)
                     .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_MEMO));
-            if (memo.getS3FileUrl() != null){
+            if (memo.getS3FileUrl() != null) {
                 fileService.fileDelete(memo.getS3FileUrl());
             }
             memoRepository.delete(memo);
@@ -95,10 +98,9 @@ public class MemoService {
     }
 
     @Transactional(readOnly = true)
-    public List<MemoResponseDTO> searchMemoWithKeyword(Long workspaceId, String keyword) {
-        return memoRepository.findAllByWorkspace_IdAndDescriptionContainingOrderByCreatedAtDesc(workspaceId, keyword)
-                .stream().map(MemoResponseDTO::new)
-                .collect(Collectors.toList());
+    public Slice<MemoResponseDTO> searchMemoWithKeyword(Long workspaceId, String keyword, Pageable pageable) {
+        return memoRepository.findAllByWorkspace_IdAndDescriptionContainingOrderByCreatedAtDesc(workspaceId, keyword, pageable)
+                .map(MemoResponseDTO::new);
     }
 
     public void deleteAllMemo(Long workspaceId) {
@@ -106,7 +108,8 @@ public class MemoService {
     }
 
     public void convertTodo(ConvertReqeustDTO convertReqeustDTO) {
-        Memo memo = memoRepository.findByWorkspace_Id(convertReqeustDTO.getMemoId());
+        Memo memo = memoRepository.findById(convertReqeustDTO.getMemoId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_MEMO));
 
         MemoUser memoUser = memoUserRepository.findByEmail(convertReqeustDTO.getEmail()).orElseThrow(
                 () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)

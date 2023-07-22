@@ -74,9 +74,9 @@ public class TokenProvider {
     public Claims getExpiredTokenClaims(String token) {
         try {
             Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody();
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT token.");
             return e.getClaims();
@@ -87,6 +87,7 @@ public class TokenProvider {
     public boolean validate(String token) {
         return this.getTokenClaims(token) != null;
     }
+
     public Claims getTokenClaims(String token) {
         try {
             return Jwts.parser()

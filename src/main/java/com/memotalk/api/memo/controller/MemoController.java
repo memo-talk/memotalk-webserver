@@ -35,7 +35,7 @@ public class MemoController {
     public void deleteAllMessage(@Valid MemoDeleteAllRequestDTO memoDeleteAllRequestDto) {
         memoService.deleteAllMemo(memoDeleteAllRequestDto.getWorkspaceId());
         messagingTemplate.convertAndSend(DESTINATION + memoDeleteAllRequestDto.getWorkspaceId()
-                , new MemoDeleteResponseDTO("워크스페이스" + memoDeleteAllRequestDto.getWorkspaceId()  + " 의 모든 메모가 삭제되었습니다."));
+                , new MemoDeleteResponseDTO("워크스페이스" + memoDeleteAllRequestDto.getWorkspaceId() + " 의 모든 메모가 삭제되었습니다."));
     }
 
     @MessageMapping(value = "/memo/mark-important")

@@ -27,7 +27,8 @@ public class TodoResponseDTO {
 
     @Schema(description = "워크스페이스 수정일시 (yyyy-MM-dd'T'HH:mm:ss)")
     private String modifiedAt;
-    public TodoResponseDTO(Todo todo){
+
+    public TodoResponseDTO(Todo todo) {
         this.todoId = todo.getId();
         this.status = todo.getStatus();
         this.description = todo.getDescription();

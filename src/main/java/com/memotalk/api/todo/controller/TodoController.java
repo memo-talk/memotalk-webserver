@@ -37,7 +37,7 @@ public class TodoController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 형식")
     })
     @PostMapping("/create")
-    public ResponseEntity<Void> create(@RequestBody @Valid TodoRequestDTO requestDTO){
+    public ResponseEntity<Void> create(@RequestBody @Valid TodoRequestDTO requestDTO) {
         todoService.create(requestDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -48,7 +48,7 @@ public class TodoController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 형식")
     })
     @PatchMapping("/update")
-    public ResponseEntity<Void> update(@RequestBody @Valid TodoUpdateRequestDTO requestDTO){
+    public ResponseEntity<Void> update(@RequestBody @Valid TodoUpdateRequestDTO requestDTO) {
         todoService.update(requestDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -59,7 +59,7 @@ public class TodoController {
             @ApiResponse(responseCode = "404", description = "할 일을 찾을 수 없음")
     })
     @GetMapping("/load/{todoId}")
-    public ResponseEntity<TodoResponseDTO> loadTodo(@PathVariable Long todoId){
+    public ResponseEntity<TodoResponseDTO> loadTodo(@PathVariable Long todoId) {
         TodoResponseDTO todoResponseDTO = todoService.loadTodo(todoId);
         return ResponseEntity.status(HttpStatus.OK).body(todoResponseDTO);
     }
@@ -72,7 +72,7 @@ public class TodoController {
             @ApiResponse(responseCode = "404", description = "할 일을 찾을 수 없음")
     })
     @DeleteMapping("/delete/{todoId}")
-    public ResponseEntity<Void> delete(@Parameter(hidden = true) @AuthenticationPrincipal String email, @PathVariable Long todoId){
+    public ResponseEntity<Void> delete(@Parameter(hidden = true) @AuthenticationPrincipal String email, @PathVariable Long todoId) {
         todoService.delete(email, todoId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -85,7 +85,7 @@ public class TodoController {
             @ApiResponse(responseCode = "404", description = "워크 스페이스를 찾을 수 없음")
     })
     @DeleteMapping("/delete-all/{workspaceId}")
-    public ResponseEntity<Void> deleteAll(@Parameter(hidden = true) @AuthenticationPrincipal String email, @PathVariable Long workspaceId){
+    public ResponseEntity<Void> deleteAll(@Parameter(hidden = true) @AuthenticationPrincipal String email, @PathVariable Long workspaceId) {
         todoService.deleteAll(email, workspaceId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -98,7 +98,7 @@ public class TodoController {
             @ApiResponse(responseCode = "404", description = "할 일을 찾을 수 없음")
     })
     @PostMapping("/change-status/{todoId}")
-    public ResponseEntity<Void> changeStatus(@Parameter(hidden = true) @AuthenticationPrincipal String email, @PathVariable Long todoId){
+    public ResponseEntity<Void> changeStatus(@Parameter(hidden = true) @AuthenticationPrincipal String email, @PathVariable Long todoId) {
         todoService.changeStatus(email, todoId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

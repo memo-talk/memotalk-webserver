@@ -19,7 +19,7 @@ public class CookieUtil {
     public static Optional<Cookie> getCookie(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
 
-        if (cookies != null && cookies.length > 0) {
+        if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (name.equals(cookie.getName())) {
                     return Optional.of(cookie);
@@ -41,7 +41,7 @@ public class CookieUtil {
     public static void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {
         Cookie[] cookies = request.getCookies();
 
-        if (cookies != null && cookies.length > 0) {
+        if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (name.equals(cookie.getName())) {
                     ResponseCookie responseCookie = ResponseCookie.from(name, "")
@@ -54,7 +54,7 @@ public class CookieUtil {
         }
     }
 
-    public static void addSameSiteCookie(HttpServletResponse response, String name, String value, int maxAge){
+    public static void addSameSiteCookie(HttpServletResponse response, String name, String value, int maxAge) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .maxAge(maxAge)
                 .httpOnly(true)
@@ -69,7 +69,7 @@ public class CookieUtil {
     public static void deleteSameSiteCookie(HttpServletRequest request, HttpServletResponse response, String name) {
         Cookie[] cookies = request.getCookies();
 
-        if (cookies != null && cookies.length > 0) {
+        if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (name.equals(cookie.getName())) {
                     ResponseCookie responseCookie = ResponseCookie.from(name, "")

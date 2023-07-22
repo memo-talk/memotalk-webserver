@@ -31,6 +31,7 @@ public class EmailService {
     private static final String ENCODING = "UTF-8";
     private static final String VARIABLE = "authCode";
     private static final String TEMPLATE = "mail";
+
     @Async
     public void sendEmail(String toEmail) {
         String randomNumber = generateAuthCode();
@@ -67,7 +68,7 @@ public class EmailService {
     public void verifyAuthCode(AuthenticationCodeRequestDTO requestDTO) {
         if (!emailCertificationRepository.hasKey(requestDTO.getEmail()) ||
                 !emailCertificationRepository.getEmailCertification(requestDTO.getEmail())
-                        .equals(requestDTO.getAuthCode())){
+                        .equals(requestDTO.getAuthCode())) {
             throw new NoAuthException(ErrorCode.AUTHENTICATION_NUMBER_MISMATCH);
         }
     }

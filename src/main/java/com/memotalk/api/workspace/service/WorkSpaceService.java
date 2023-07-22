@@ -1,11 +1,11 @@
 package com.memotalk.api.workspace.service;
 
-import com.memotalk.api.workspace.dto.WorkSpaceResponseDTO;
-import com.memotalk.api.workspace.respository.WorkSpaceRepository;
 import com.memotalk.api.memouser.entity.MemoUser;
 import com.memotalk.api.memouser.respository.MemoUserRepository;
 import com.memotalk.api.workspace.dto.WorkSpaceModifyRequestDTO;
+import com.memotalk.api.workspace.dto.WorkSpaceResponseDTO;
 import com.memotalk.api.workspace.entity.WorkSpace;
+import com.memotalk.api.workspace.respository.WorkSpaceRepository;
 import com.memotalk.exception.NoAuthException;
 import com.memotalk.exception.NotFoundException;
 import com.memotalk.exception.enumeration.ErrorCode;
@@ -25,8 +25,9 @@ public class WorkSpaceService {
     private final MemoUserRepository memoUserRepository;
     private static final long INIT_PRIORITY = 9999L;
     private static final long NEXT_ORDER = 1;
+
     public void create(String email) {
-        if(!memoUserRepository.existsByEmail(email)){
+        if (!memoUserRepository.existsByEmail(email)) {
             throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
 
@@ -42,7 +43,7 @@ public class WorkSpaceService {
     }
 
     public void modify(String email, WorkSpaceModifyRequestDTO requestDTO) {
-        if(!memoUserRepository.existsByEmail(email)){
+        if (!memoUserRepository.existsByEmail(email)) {
             throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
 
@@ -52,7 +53,7 @@ public class WorkSpaceService {
     }
 
     public void delete(String email, Long workspaceId) {
-        if(!memoUserRepository.existsByEmail(email)){
+        if (!memoUserRepository.existsByEmail(email)) {
             throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
 
@@ -62,7 +63,7 @@ public class WorkSpaceService {
 
     @Transactional(readOnly = true)
     public List<WorkSpaceResponseDTO> getList(String email) {
-        if(!memoUserRepository.existsByEmail(email)){
+        if (!memoUserRepository.existsByEmail(email)) {
             throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
 
@@ -71,8 +72,8 @@ public class WorkSpaceService {
                 .collect(Collectors.toList());
     }
 
-    public void moveTopWorkspace(String email, Long workspaceId){
-        if(!memoUserRepository.existsByEmail(email)){
+    public void moveTopWorkspace(String email, Long workspaceId) {
+        if (!memoUserRepository.existsByEmail(email)) {
             throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
 
@@ -87,7 +88,7 @@ public class WorkSpaceService {
 
     @Transactional(readOnly = true)
     public WorkSpaceResponseDTO getWorkspace(String email, Long workspaceId) {
-        if(!memoUserRepository.existsByEmail(email)){
+        if (!memoUserRepository.existsByEmail(email)) {
             throw new NoAuthException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
 

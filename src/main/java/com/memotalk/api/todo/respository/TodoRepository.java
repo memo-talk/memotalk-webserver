@@ -13,11 +13,15 @@ import java.util.List;
 @Repository
 public interface TodoRepository extends JpaRepository<Todo, Long> {
     List<Todo> findAllByWorkspace_Id(Long workspaceId);
+
     void deleteByWorkspace_MemoUser_EmailAndId(String email, Long todoId);
+
     Todo findByWorkspace_MemoUser_EmailAndId(String email, Long todoId);
+
     List<Todo> findAllByWorkspace_IdAndStatus(Long workspaceId, Status done);
 
     void deleteAllByWorkspace_MemoUser_EmailAndWorkspace_Id(String email, Long workspaceId);
+
     Todo findByIdAndWorkspace_Id(Long todoId, Long workspaceId);
 
     @Modifying

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class TodoService {
     private final WorkSpaceRepository workSpaceRepository;
     private final TodoRepository todoRepository;
+
     @Transactional(readOnly = true)
     public List<TodoGroupByDateDTO> getTodoList(Long workspaceId) {
         List<Todo> todos = todoRepository.findAllByWorkspace_IdAndStatus(workspaceId, Status.TODO);
@@ -57,7 +58,7 @@ public class TodoService {
 
     public void create(TodoRequestDTO requestDTO) {
         WorkSpace workspace = workSpaceRepository.findById(requestDTO.getWorkspaceId())
-                        .orElseThrow(()->new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.WORKSPACE_NOT_FOUND));
 
         todoRepository.save(new Todo(workspace, requestDTO.getContent()));
     }

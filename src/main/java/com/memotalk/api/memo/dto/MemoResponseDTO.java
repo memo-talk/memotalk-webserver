@@ -18,7 +18,7 @@ public class MemoResponseDTO {
     private String createdAt;
     private String modifiedAt;
 
-    public MemoResponseDTO(Memo memo){
+    public MemoResponseDTO(Memo memo) {
         this.id = memo.getId();
         this.content = memo.getDescription();
         this.createdAt = memo.getCreatedAt().toString();

@@ -26,7 +26,7 @@ public class WorkSpaceResponseDTO {
     @Schema(description = "워크스페이스 수정일시 (yyyy-MM-dd'T'HH:mm:ss)")
     private String modifiedAt;
 
-    public WorkSpaceResponseDTO(WorkSpace workSpace){
+    public WorkSpaceResponseDTO(WorkSpace workSpace) {
         this.id = workSpace.getId();
         this.title = workSpace.getTitle();
         this.imageId = workSpace.getImageId();

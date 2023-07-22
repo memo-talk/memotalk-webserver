@@ -1,7 +1,9 @@
 package com.memotalk.api.memouser.service;
 
 import com.memotalk.api.memouser.dto.*;
+import com.memotalk.api.memouser.entity.MemoUser;
 import com.memotalk.api.memouser.entity.UserRefreshToken;
+import com.memotalk.api.memouser.respository.MemoUserRepository;
 import com.memotalk.api.memouser.respository.UserRefreshTokenRepository;
 import com.memotalk.api.workspace.entity.WorkSpace;
 import com.memotalk.api.workspace.respository.WorkSpaceRepository;
@@ -9,8 +11,6 @@ import com.memotalk.config.jwt.TokenProvider;
 import com.memotalk.exception.BadRequestException;
 import com.memotalk.exception.NotFoundException;
 import com.memotalk.exception.enumeration.ErrorCode;
-import com.memotalk.api.memouser.entity.MemoUser;
-import com.memotalk.api.memouser.respository.MemoUserRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -43,13 +43,13 @@ public class MemoUserService {
                 () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
         );
 
-        if (!passwordEncoder.matches(requestDTO.getPassword(), memoUser.getPassword())){
+        if (!passwordEncoder.matches(requestDTO.getPassword(), memoUser.getPassword())) {
             throw new NotFoundException(ErrorCode.PASSWORD_MISMATCH);
         }
 
         // 토큰 생성
         String accessToken = tokenProvider.generateAccessToken(requestDTO.getEmail());
-        String refreshToken = tokenProvider.generateRefreshToken("" + memoUser.getId());
+        String refreshToken = tokenProvider.generateRefreshToken(String.valueOf(memoUser.getId()));
 
         UserRefreshToken userRefreshToken = userRefreshTokenRepository.findByUserId(memoUser.getId());
         if (userRefreshToken == null) {
@@ -68,14 +68,14 @@ public class MemoUserService {
         return new MemoUserSigninResponseDTO(accessToken, refreshToken);
     }
 
-    public void validateEmail(String email){
-        if(!memoUserRepository.existsByEmail(email)){
+    public void validateEmail(String email) {
+        if (!memoUserRepository.existsByEmail(email)) {
             throw new BadRequestException(ErrorCode.NOT_FOUND_EMAIL);
         }
     }
 
-    public void validateEmailNotExists(String email){
-        if(memoUserRepository.existsByEmail(email)){
+    public void validateEmailNotExists(String email) {
+        if (memoUserRepository.existsByEmail(email)) {
             throw new BadRequestException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
     }
@@ -140,7 +140,7 @@ public class MemoUserService {
 
         if (validTime <= THREE_DAYS_MSEC) {
             // refresh 토큰 설정
-            refreshToken = tokenProvider.generateRefreshToken("" + userId);
+            refreshToken = tokenProvider.generateRefreshToken(String.valueOf(userId));
 
             // DB에 refresh 토큰 업데이트
             userRefreshToken.setRefreshToken(refreshToken);
@@ -154,7 +154,7 @@ public class MemoUserService {
                 () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
         );
 
-        if (!passwordEncoder.matches(password, memoUser.getPassword())){
+        if (!passwordEncoder.matches(password, memoUser.getPassword())) {
             throw new BadRequestException(ErrorCode.PASSWORD_MISMATCH);
         }
     }
