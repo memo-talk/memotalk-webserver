@@ -45,8 +45,8 @@ public class MemoController {
     }
 
     @MessageMapping(value = "/memo/convert-todo")
-    public void convertTodo(@Valid ConvertReqeustDTO convertReqeustDTO) {
-        memoService.convertTodo(convertReqeustDTO);
-        messagingTemplate.convertAndSend(DESTINATION + convertReqeustDTO.getMemoId(), "변환 완료");
+    public void convertTodo(@Valid ConvertRequestDTO convertRequestDTO) {
+        memoService.convertTodo(convertRequestDTO);
+        messagingTemplate.convertAndSend(DESTINATION + convertRequestDTO.getMemoId(), "변환 완료");
     }
 }

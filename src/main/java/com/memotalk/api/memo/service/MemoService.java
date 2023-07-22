@@ -4,11 +4,11 @@ import com.memotalk.api.memo.dto.*;
 import com.memotalk.api.memo.entity.Memo;
 import com.memotalk.api.memo.respository.MemoRepository;
 import com.memotalk.api.memouser.dto.MemoGroupByDateDTO;
-import com.memotalk.api.memouser.entity.MemoUser;
 import com.memotalk.api.memouser.respository.MemoUserRepository;
+import com.memotalk.api.todo.entity.Todo;
+import com.memotalk.api.todo.respository.TodoRepository;
 import com.memotalk.api.workspace.entity.WorkSpace;
 import com.memotalk.api.workspace.respository.WorkSpaceRepository;
-import com.memotalk.exception.BadRequestException;
 import com.memotalk.exception.NotFoundException;
 import com.memotalk.exception.enumeration.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +31,10 @@ public class MemoService {
     private final WorkSpaceRepository workSpaceRepository;
     private final FileService fileService;
     private final MemoUserRepository memoUserRepository;
+    private final TodoRepository todoRepository;
     private static final long INIT_PRIORITY = 9999L;
     private static final long NEXT_ORDER = 1;
+
 
     @Transactional(readOnly = true)
     public List<MemoGroupByDateDTO> getMemoList(Long workspaceId) {
@@ -107,18 +109,10 @@ public class MemoService {
         memoRepository.deleteAllByWorkspace_Id(workspaceId);
     }
 
-    public void convertTodo(ConvertReqeustDTO convertReqeustDTO) {
-        Memo memo = memoRepository.findById(convertReqeustDTO.getMemoId())
+    public void convertTodo(ConvertRequestDTO convertRequestDTO) {
+        Memo memo = memoRepository.findById(convertRequestDTO.getMemoId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_MEMO));
 
-        MemoUser memoUser = memoUserRepository.findByEmail(convertReqeustDTO.getEmail()).orElseThrow(
-                () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
-        );
-
-        long priority = workSpaceRepository.findDistinctTopByMemoUser_EmailOrderByPriorityDesc(convertReqeustDTO.getEmail())
-                .map(WorkSpace::getPriority)
-                .orElse(INIT_PRIORITY);
-
-        workSpaceRepository.save(new WorkSpace(memoUser, priority + NEXT_ORDER, memo.getDescription()));
+        todoRepository.save(new Todo(memo.getWorkspace(), memo.getDescription()));
     }
 }

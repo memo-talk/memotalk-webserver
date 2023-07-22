@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ConvertReqeustDTO {
+public class ConvertRequestDTO {
     @NotNull
     private Long memoId;
     @NotNull
