@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메모톡 인증번호 안내</title>
+</head>
+
+<body style="margin: 0 auto; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scrollbar-width: none; -ms-overflow-style: none;">
+<div style="width: 100%; height: 100vh;">
+    <div style="display: flex; flex-direction: column; padding-top: 3.5rem; padding-left: 4.5rem; padding-right: 4.5rem; gap: 2.1875rem;">
+        <div style="display: flex; flex-direction: row; align-items: center; justify-items: center; gap: 8px;">
+            <img alt="Memotalk" src="https://memotalk.s3.ap-northeast-2.amazonaws.com/static/ic_logo.png" style="width: 24px; height: 24px;">
+            <p style="font-family: 'Pretendard Variable', 'Poppins', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; font-style: normal; font-weight: 700; font-size: 1rem; color: #454545;">Memotalk</p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <p style="font-family: 'Pretendard Variable', 'Poppins', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 1.8125rem; color: #212121;">메모톡 인증번호 안내</p>
+            <p style="font-family: 'Pretendard Variable', 'Poppins', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; font-style: normal; font-weight: 400; font-size: 1rem; line-height: 1.5rem; color: #454545;">
+                안녕하세요, 메모톡입니다.<br/>
+                <b style="font-weight: 600; color: #212121;">‘계정 등록’</b>을 위해 이메일 인증을 진행합니다.<br/>
+                아래 발급된 이메일 인증번호를 복사하거나 직접 입력하여 인증을 완료해 주세요.
+            </p>
+        </div>
+
+        <div style="height: 56px; display: flex; flex-direction: row; gap: 2rem; align-items: center; border-top: 1px solid #d9d9d9; border-bottom: 1px solid #d9d9d9;">
+            <p style="font-family: 'Pretendard Variable', 'Poppins', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; font-style: normal; padding-left: 1rem; font-weight: 500; font-size: 1rem; color: #212121; line-height: 1.5rem;">인증번호</p>
+            <p style="font-family: 'Pretendard Variable', 'Poppins', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; font-style: normal; font-weight: 500; font-size: 1rem; color: #2487e2; line-height: 1.5rem; letter-spacing: 0.05rem;" th:text="${authCode}"></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

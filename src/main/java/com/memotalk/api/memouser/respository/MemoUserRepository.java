@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface MemoUserRepository extends JpaRepository<MemoUser, Long> {
     boolean existsByEmail(String email);
-
     Optional<MemoUser> findByEmail(String email);
+    MemoUser findById(String id);
 }

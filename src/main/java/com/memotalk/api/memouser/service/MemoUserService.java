@@ -1,23 +1,19 @@
 package com.memotalk.api.memouser.service;
 
-import com.memotalk.api.memouser.dto.*;
+import com.memotalk.api.memouser.dto.MemoUserPasswordResetRequestDTO;
+import com.memotalk.api.memouser.dto.MemoUserResponseDTO;
+import com.memotalk.api.memouser.dto.MemoUserUnlockRequestDTO;
 import com.memotalk.api.memouser.entity.MemoUser;
-import com.memotalk.api.memouser.entity.UserRefreshToken;
 import com.memotalk.api.memouser.respository.MemoUserRepository;
-import com.memotalk.api.memouser.respository.UserRefreshTokenRepository;
-import com.memotalk.api.workspace.entity.WorkSpace;
 import com.memotalk.api.workspace.respository.WorkSpaceRepository;
-import com.memotalk.config.jwt.TokenProvider;
 import com.memotalk.exception.BadRequestException;
 import com.memotalk.exception.NotFoundException;
 import com.memotalk.exception.enumeration.ErrorCode;
-import io.jsonwebtoken.Claims;
+import com.memotalk.oauth.UserRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -29,44 +25,44 @@ public class MemoUserService {
     private final MemoUserRepository memoUserRepository;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final TokenProvider tokenProvider;
+//    private final TokenProvider tokenProvider;
     private final WorkSpaceRepository workSpaceRepository;
 
-    public void signup(MemoUserSignupRequestDTO dto) {
-        validateEmailNotExists(dto.getEmail());
-        MemoUser saved = memoUserRepository.save(new MemoUser(dto.getEmail(), passwordEncoder.encode(dto.getPassword())));
-        workSpaceRepository.save(new WorkSpace(saved, INIT_PRIORITY));
-    }
-
-    public MemoUserSigninResponseDTO signin(MemoUserSigninRequestDTO requestDTO) {
-        MemoUser memoUser = memoUserRepository.findByEmail(requestDTO.getEmail()).orElseThrow(
-                () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
-        );
-
-        if (!passwordEncoder.matches(requestDTO.getPassword(), memoUser.getPassword())) {
-            throw new NotFoundException(ErrorCode.PASSWORD_MISMATCH);
-        }
-
-        // 토큰 생성
-        String accessToken = tokenProvider.generateAccessToken(requestDTO.getEmail());
-        String refreshToken = tokenProvider.generateRefreshToken(String.valueOf(memoUser.getId()));
-
-        UserRefreshToken userRefreshToken = userRefreshTokenRepository.findByUserId(memoUser.getId());
-        if (userRefreshToken == null) {
-            // 없는 경우 새로 등록
-            userRefreshToken = new UserRefreshToken(memoUser.getId(), refreshToken);
-            userRefreshTokenRepository.saveAndFlush(userRefreshToken);
-        } else {
-            // DB에 refresh 토큰 업데이트
-            userRefreshToken.setRefreshToken(refreshToken);
-            userRefreshTokenRepository.saveAndFlush(userRefreshToken);
-        }
-
-        // 잠금모드 해제
-        memoUser.unlock();
-
-        return new MemoUserSigninResponseDTO(accessToken, refreshToken);
-    }
+//    public void signup(MemoUserSignupRequestDTO dto) {
+//        validateEmailNotExists(dto.getEmail());
+//        MemoUser saved = memoUserRepository.save(new MemoUser(dto.getEmail(), passwordEncoder.encode(dto.getPassword())));
+//        workSpaceRepository.save(new WorkSpace(saved, INIT_PRIORITY));
+//    }
+//
+//    public MemoUserSigninResponseDTO signin(MemoUserSigninRequestDTO requestDTO) {
+//        MemoUser memoUser = memoUserRepository.findByEmail(requestDTO.getEmail()).orElseThrow(
+//                () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
+//        );
+//
+//        if (!passwordEncoder.matches(requestDTO.getPassword(), memoUser.getPassword())) {
+//            throw new NotFoundException(ErrorCode.PASSWORD_MISMATCH);
+//        }
+//
+//        // 토큰 생성
+//        String accessToken = tokenProvider.generateAccessToken(requestDTO.getEmail());
+//        String refreshToken = tokenProvider.generateRefreshToken(String.valueOf(memoUser.getId()));
+//
+//        UserRefreshToken userRefreshToken = userRefreshTokenRepository.findByUserId(memoUser.getId());
+//        if (userRefreshToken == null) {
+//            // 없는 경우 새로 등록
+//            userRefreshToken = new UserRefreshToken(memoUser.getId(), refreshToken);
+//            userRefreshTokenRepository.saveAndFlush(userRefreshToken);
+//        } else {
+//            // DB에 refresh 토큰 업데이트
+//            userRefreshToken.setRefreshToken(refreshToken);
+//            userRefreshTokenRepository.saveAndFlush(userRefreshToken);
+//        }
+//
+//        // 잠금모드 해제
+//        memoUser.unlock();
+//
+//        return new MemoUserSigninResponseDTO(accessToken, refreshToken);
+//    }
 
     public void validateEmail(String email) {
         if (!memoUserRepository.existsByEmail(email)) {
@@ -106,48 +102,48 @@ public class MemoUserService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
-    public MemoUserSigninResponseDTO refresh(String refreshToken, String accessToken) {
-
-        if (!tokenProvider.validate(accessToken)) {
-            throw new NotFoundException(ErrorCode.INVALID_ACCESS_TOKEN);
-        }
-        // expired access token 인지 확인
-        Claims claims = tokenProvider.getExpiredTokenClaims(accessToken);
-        if (claims == null) {
-            throw new NotFoundException(ErrorCode.NOT_EXPIRED_TOKEN_YET);
-        }
-
-        if (!tokenProvider.validateToken(refreshToken)) {
-            throw new NotFoundException(ErrorCode.INVALID_REFRESH_TOKEN);
-        }
-
-        String email = claims.getSubject();
-
-        Long userId = memoUserRepository.findByEmail(email).orElseThrow(
-                () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
-        ).getId();
-
-        // userId refresh token 으로 DB 확인
-        UserRefreshToken userRefreshToken = userRefreshTokenRepository.findByUserIdAndRefreshToken(userId, refreshToken);
-        if (userRefreshToken == null) {
-            throw new NotFoundException(ErrorCode.INVALID_REFRESH_TOKEN);
-        }
-
-        String newAccessToken = tokenProvider.generateAccessToken(email);
-
-        // refresh 토큰 기간이 3일 이하로 남은 경우, refresh 토큰 갱신
-        long validTime = tokenProvider.getTokenClaims(refreshToken).getExpiration().getTime() - new Date().getTime();
-
-        if (validTime <= THREE_DAYS_MSEC) {
-            // refresh 토큰 설정
-            refreshToken = tokenProvider.generateRefreshToken(String.valueOf(userId));
-
-            // DB에 refresh 토큰 업데이트
-            userRefreshToken.setRefreshToken(refreshToken);
-        }
-
-        return new MemoUserSigninResponseDTO(newAccessToken, refreshToken);
-    }
+//    public MemoUserSigninResponseDTO refresh(String refreshToken, String accessToken) {
+//
+//        if (!tokenProvider.validate(accessToken)) {
+//            throw new NotFoundException(ErrorCode.INVALID_ACCESS_TOKEN);
+//        }
+//        // expired access token 인지 확인
+//        Claims claims = tokenProvider.getExpiredTokenClaims(accessToken);
+//        if (claims == null) {
+//            throw new NotFoundException(ErrorCode.NOT_EXPIRED_TOKEN_YET);
+//        }
+//
+//        if (!tokenProvider.validateToken(refreshToken)) {
+//            throw new NotFoundException(ErrorCode.INVALID_REFRESH_TOKEN);
+//        }
+//
+//        String email = claims.getSubject();
+//
+//        String userId = memoUserRepository.findByEmail(email).orElseThrow(
+//                () -> new NotFoundException(ErrorCode.USER_NOT_FOUND)
+//        ).getId();
+//
+//        // userId refresh token 으로 DB 확인
+//        UserRefreshToken userRefreshToken = userRefreshTokenRepository.findByUserIdAndRefreshToken(userId, refreshToken);
+//        if (userRefreshToken == null) {
+//            throw new NotFoundException(ErrorCode.INVALID_REFRESH_TOKEN);
+//        }
+//
+//        String newAccessToken = tokenProvider.generateAccessToken(email);
+//
+//        // refresh 토큰 기간이 3일 이하로 남은 경우, refresh 토큰 갱신
+//        long validTime = tokenProvider.getTokenClaims(refreshToken).getExpiration().getTime() - new Date().getTime();
+//
+//        if (validTime <= THREE_DAYS_MSEC) {
+//            // refresh 토큰 설정
+//            refreshToken = tokenProvider.generateRefreshToken(String.valueOf(userId));
+//
+//            // DB에 refresh 토큰 업데이트
+//            userRefreshTokenRepository.save(userRefreshToken);
+//        }
+//
+//        return new MemoUserSigninResponseDTO(newAccessToken, refreshToken);
+//    }
 
     public void validatePassword(String email, String password) {
         MemoUser memoUser = memoUserRepository.findByEmail(email).orElseThrow(

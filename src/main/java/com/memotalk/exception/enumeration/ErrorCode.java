@@ -10,7 +10,7 @@ public enum ErrorCode {
     AUTHENTICATION_NUMBER_MISMATCH("인증번호가 일치하지 않습니다."),
     NOT_FOUND_MEMO("존재하지 않는 메세지입니다."),
     WORKSPACE_NOT_FOUND("존재하지 않는 워크 스페이스입니다."),
-    USER_NOT_FOUND("유효하지 않은 이메일입니다."),
+    USER_NOT_FOUND("존재하지 않는 유저입니다."),
     PASSWORD_MISMATCH("비밀번호를 잘못 입력했습니다"),
     EMAIL_ALREADY_EXISTS("이미 가입된 이메일입니다."),
     USER_NOT_FOUND_OR_PASSWORD_MISMATCH("사용자를 찾을 수 없거나 비밀번호가 일치하지 않습니다."),

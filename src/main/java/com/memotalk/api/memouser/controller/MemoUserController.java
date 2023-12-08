@@ -1,10 +1,11 @@
 package com.memotalk.api.memouser.controller;
 
 import com.memotalk.api.email.dto.AuthCodeRequestDTO;
-import com.memotalk.api.memouser.dto.*;
+import com.memotalk.api.memouser.dto.MemoUserPasswordResetRequestDTO;
+import com.memotalk.api.memouser.dto.MemoUserResponseDTO;
+import com.memotalk.api.memouser.dto.MemoUserSigninResponseDTO;
+import com.memotalk.api.memouser.dto.MemoUserUnlockRequestDTO;
 import com.memotalk.api.memouser.service.MemoUserService;
-import com.memotalk.util.CookieUtil;
-import com.memotalk.util.HeaderUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,9 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -38,17 +36,17 @@ public class MemoUserController {
     private int refreshTokenExpirationTime;
     private static final String REFRESH_TOKEN = "refreshToken";
 
-    @Operation(summary = "회원 가입 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "회원 가입 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식"),
-            @ApiResponse(responseCode = "409", description = "중복된 이메일")
-    })
-    @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@Valid @RequestBody MemoUserSignupRequestDTO dto) {
-        memoUserService.signup(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
+//    @Operation(summary = "회원 가입 API")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "201", description = "회원 가입 성공"),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식"),
+//            @ApiResponse(responseCode = "409", description = "중복된 이메일")
+//    })
+//    @PostMapping("/signup")
+//    public ResponseEntity<Void> signup(@Valid @RequestBody MemoUserSignupRequestDTO dto) {
+//        memoUserService.signup(dto);
+//        return ResponseEntity.status(HttpStatus.CREATED).build();
+//    }
 
     @Operation(summary = "회원 탈퇴 API")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -62,20 +60,20 @@ public class MemoUserController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @Operation(summary = "로그인 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 성공",
-                    content = @Content(schema = @Schema(implementation = MemoUserSigninResponseDTO.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식"),
-            @ApiResponse(responseCode = "401", description = "인증 실패")
-    })
-    @PostMapping("/signin")
-    public ResponseEntity<MemoUserSigninResponseDTO> signin(@Valid @RequestBody MemoUserSigninRequestDTO requestDTO, HttpServletResponse response, HttpServletRequest request) {
-        MemoUserSigninResponseDTO responseDTO = memoUserService.signin(requestDTO);
-        CookieUtil.addSameSiteCookie(response, REFRESH_TOKEN, responseDTO.getRefreshToken(), refreshTokenExpirationTime);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-    }
+//    @Operation(summary = "로그인 API")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "로그인 성공",
+//                    content = @Content(schema = @Schema(implementation = MemoUserSigninResponseDTO.class))),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식"),
+//            @ApiResponse(responseCode = "401", description = "인증 실패")
+//    })
+//    @PostMapping("/signin")
+//    public ResponseEntity<MemoUserSigninResponseDTO> signin(@Valid @RequestBody MemoUserSigninRequestDTO requestDTO, HttpServletResponse response, HttpServletRequest request) {
+//        MemoUserSigninResponseDTO responseDTO = memoUserService.signin(requestDTO);
+//        CookieUtil.addSameSiteCookie(response, REFRESH_TOKEN, responseDTO.getRefreshToken(), refreshTokenExpirationTime);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+//    }
 
     @Operation(summary = "내 정보 불러오기 API")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -135,27 +133,27 @@ public class MemoUserController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @Operation(summary = "리프레시 토큰 API")
-    @SecurityRequirement(name = "Bearer Authentication")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "리프레시 성공",
-                    content = @Content(schema = @Schema(implementation = MemoUserSigninResponseDTO.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식"),
-            @ApiResponse(responseCode = "401", description = "인증 실패")
-    })
-    @PostMapping("/refresh")
-    public ResponseEntity<MemoUserSigninResponseDTO> refreshToken(
-            HttpServletRequest request) {
-
-        // access token 확인
-        String accessToken = HeaderUtil.getAccessToken(request);
-        String refreshToken = CookieUtil.getCookie(request, REFRESH_TOKEN)
-                .map(Cookie::getValue)
-                .orElse((null));
-        MemoUserSigninResponseDTO responseDTO = memoUserService.refresh(refreshToken, accessToken);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-    }
+//    @Operation(summary = "리프레시 토큰 API")
+//    @SecurityRequirement(name = "Bearer Authentication")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "리프레시 성공",
+//                    content = @Content(schema = @Schema(implementation = MemoUserSigninResponseDTO.class))),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청 형식"),
+//            @ApiResponse(responseCode = "401", description = "인증 실패")
+//    })
+//    @PostMapping("/refresh")
+//    public ResponseEntity<MemoUserSigninResponseDTO> refreshToken(
+//            HttpServletRequest request) {
+//
+//        // access token 확인
+//        String accessToken = HeaderUtil.getAccessToken(request);
+//        String refreshToken = CookieUtil.getCookie(request, REFRESH_TOKEN)
+//                .map(Cookie::getValue)
+//                .orElse((null));
+//        MemoUserSigninResponseDTO responseDTO = memoUserService.refresh(refreshToken, accessToken);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+//    }
 
     @Operation(summary = "이메일 유효성 체킹 API")
     @ApiResponses(value = {
